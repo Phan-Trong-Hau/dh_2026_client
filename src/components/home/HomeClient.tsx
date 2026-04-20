@@ -29,6 +29,8 @@ export default function HomeClient({ data }: Props) {
   const [slidesOpen, setSlidesOpen] = useState(false)
   const slidesRef = useRef<HTMLDivElement>(null)
 
+  const heroRef = useRef<HTMLElement>(null)
+
   const handleOpen = () => {
     if (!slidesOpen) {
       setSlidesOpen(true)
@@ -40,6 +42,10 @@ export default function HomeClient({ data }: Props) {
     }
   }
 
+  const handleBack = () => {
+    heroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const anhNen = data?.data?.anh_nen
   const anhNenSlide = data?.data?.anh_nen_slide
   const danhSachSlide = data?.data?.danh_sach_slide ?? []
@@ -47,14 +53,14 @@ export default function HomeClient({ data }: Props) {
   return (
     <main className="flex flex-col">
       {/* ── HERO ── */}
-      <section className="relative h-screen overflow-hidden">
+      <section ref={heroRef} className="relative h-screen overflow-hidden">
         {/* Ảnh nền hero từ Strapi */}
         {anhNen?.url ? (
           <Image
             src={anhNen.url}
             alt={anhNen.alternativeText ?? 'Ảnh nền đại hội'}
             fill
-            className="object-cover object-center"
+            className="object-center"
             priority
           />
         ) : (
@@ -63,7 +69,7 @@ export default function HomeClient({ data }: Props) {
         )}
 
         {/* Vòng tròn xoay - click để xuống slide */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-10">
           <RotatingCircle onClick={handleOpen} isOpen={slidesOpen} />
         </div>
       </section>
@@ -74,6 +80,7 @@ export default function HomeClient({ data }: Props) {
           <SlideSection
             anhNenSlide={anhNenSlide ?? null}
             danhSachSlide={danhSachSlide}
+            onBack={handleBack}
           />
         </div>
       )}
