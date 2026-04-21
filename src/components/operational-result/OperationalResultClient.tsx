@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import Image from 'next/image'
 
 const SLIDE_MS = 650
 const FADE_MS = 400
@@ -189,7 +188,11 @@ export default function OperationalResultClient({ data }: Props) {
 
       {/* Background */}
       {anhNen?.url && (
-        <Image src={anhNen.url} alt="" fill className="object-cover object-center" priority />
+        <img 
+          src={anhNen.url} 
+          alt="" 
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} 
+        />
       )}
 
       {/* ── LIST VIEW — luôn trong DOM, không bao giờ unmount ── */}

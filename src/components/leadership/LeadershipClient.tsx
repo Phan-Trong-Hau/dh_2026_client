@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import Image from 'next/image'
 
 interface StrapiImage {
   url: string
@@ -60,14 +59,15 @@ export default function LeadershipClient({ data }: Props) {
   const openDetail = useCallback((idx: number) => {
     setSelected(idx)
     setDetailOpacity(0)
+    // Giảm xuống 1 rAF hoặc timeout cực ngắn để trigger sớm hơn
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => setDetailOpacity(1))
+      setDetailOpacity(1)
     })
   }, [])
 
   const closeDetail = useCallback(() => {
     setDetailOpacity(0)
-    setTimeout(() => setSelected(null), 400)
+    setTimeout(() => setSelected(null), 800)
   }, [])
 
   const detailItem = selected !== null ? items[selected] : null
@@ -78,12 +78,10 @@ export default function LeadershipClient({ data }: Props) {
       {anhNen?.url && (
         <div className="absolute inset-0 z-0 transition-transform duration-1000"
              style={{ transform: selected !== null ? 'scale(1.05)' : 'scale(1)' }}>
-          <Image 
+          <img 
             src={anhNen.url} 
             alt="Background" 
-            fill 
-            className="object-cover object-center" 
-            priority 
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} 
           />
           <div className="absolute inset-0 bg-black/10" />
         </div>
@@ -93,10 +91,11 @@ export default function LeadershipClient({ data }: Props) {
       <div 
         className="relative z-10 w-full max-w-[1400px] h-[80vh] grid grid-cols-5 grid-rows-3 gap-4 mt-28 xl:gap-4"
         style={{
-          opacity: selected !== null ? 0 : 1,
-          transform: selected !== null ? 'scale(0.95)' : 'scale(1)',
-          transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-          pointerEvents: selected !== null ? 'none' : 'auto'
+          opacity: 1 - detailOpacity,
+          transform: selected !== null ? 'scale(0.98)' : 'scale(1)',
+          transition: 'transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+          pointerEvents: selected !== null ? 'none' : 'auto',
+          willChange: 'opacity, transform'
         }}
       >
         {items.map((item, i) => (
@@ -110,12 +109,11 @@ export default function LeadershipClient({ data }: Props) {
             }}
           >
             {item.anh_chan_dung?.url && (
-              <Image
+              <img
                 src={item.anh_chan_dung.url}
                 alt={item.ho_ten || 'Lãnh đạo'}
-                fill
-                className="object-contain transition-transform duration-700"
-                sizes="(max-width: 1400px) 20vw, 300px"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+                className="transition-transform duration-700"
               />
             )}
             
@@ -126,7 +124,7 @@ export default function LeadershipClient({ data }: Props) {
       {/* Detail Overlay */}
       {detailItem && (
         <div 
-          className="absolute inset-0 z-20 flex items-center justify-center transition-all duration-500"
+          className="absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-800 will-change-opacity"
           style={{
             opacity: detailOpacity,
             visibility: detailOpacity === 0 && selected === null ? 'hidden' : 'visible'
@@ -135,11 +133,11 @@ export default function LeadershipClient({ data }: Props) {
           {/* Detail Background Layer */}
           <div className="absolute inset-0 z-21">
             {(anhNenChiTiet?.url || anhNen?.url) && (
-               <Image 
+               <img 
                   src={anhNenChiTiet?.url || anhNen!.url} 
                   alt="Detail Background" 
-                  fill 
-                  className="object-cover object-center animate-pulse-slow"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                  className="animate-pulse-slow"
                />
             )}
             <div className="absolute inset-0 bg-black/50" />
@@ -157,12 +155,11 @@ export default function LeadershipClient({ data }: Props) {
                     transform: detailOpacity === 1 ? 'scale(1)' : 'scale(0.9)',
                   }}
                 >
-                    <Image
+                    <img
                         src={detailItem.anh_chi_tiet.url}
                         alt="Chi tiết lãnh đạo"
-                        fill
-                        className="object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]"
-                        priority
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+                        className="drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]"
                     />
                 </div>
              )}

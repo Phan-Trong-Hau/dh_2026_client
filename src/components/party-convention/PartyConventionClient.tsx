@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 
 const TRANSITION_MS = 350
@@ -170,12 +169,10 @@ export default function PartyConventionClient({ data }: Props) {
 
       {/* ── Background layer 1: anh_nen_chi_tiet — luôn hiện, không bao giờ unmount ── */}
       {anhNenChiTiet?.url && (
-        <Image
+        <img
           src={anhNenChiTiet.url}
           alt=""
-          fill
-          className="object-cover object-center"
-          priority
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
       )}
 
@@ -188,12 +185,10 @@ export default function PartyConventionClient({ data }: Props) {
             transition: `opacity ${TRANSITION_MS}ms ease`,
           }}
         >
-          <Image
+          <img
             src={anhNen.url}
             alt=""
-            fill
-            className="object-cover object-center"
-            priority
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
           />
         </div>
       )}
