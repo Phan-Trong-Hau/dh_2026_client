@@ -167,7 +167,7 @@ export default function OperationalResultClient({ data }: Props) {
   // Đóng detail: fade out rồi mới unmount
   const closeDetail = useCallback(() => {
     setDetailOpacity(0)
-    setTimeout(() => setSelected(null), FADE_MS)
+    setTimeout(() => setSelected(null), 600)
   }, [])
 
   const currentItem = items[currentIdx]
@@ -202,7 +202,7 @@ export default function OperationalResultClient({ data }: Props) {
           pointerEvents: selected !== null ? 'none' : 'auto',
         }}
       >
-        <div className="flex items-center gap-6 w-full px-8 justify-center">
+        <div className="flex items-center gap-12 w-full px-8 justify-center">
 
           <button
             onClick={goPrev}
@@ -213,8 +213,13 @@ export default function OperationalResultClient({ data }: Props) {
           </button>
 
           <div
-            className={`relative overflow-hidden flex-shrink-0 transition-opacity duration-300 ${selected !== null ? 'opacity-0' : ''}`}
-            style={{ width: SLIDE_W, height: SLIDE_H }}
+            className={`relative overflow-hidden flex-shrink-0 transition-all duration-600`}
+            style={{ 
+              width: SLIDE_W, 
+              height: SLIDE_H,
+              opacity: 1 - detailOpacity,
+              transform: selected !== null ? 'scale(0.98)' : 'scale(1)',
+            }}
           >
             <SlideFrame 
               translateX={outgoingX} 
@@ -302,19 +307,29 @@ export default function OperationalResultClient({ data }: Props) {
       {/* ── DETAIL OVERLAY — fade in/out trên top, list không bị unmount ── */}
       {detailItem && (
         <div
-          className="absolute inset-0 -top-10 z-20 flex items-center justify-center cursor-pointer"
+          className="absolute inset-0 top-18 z-20 flex items-center justify-center cursor-pointer transition-opacity duration-600"
           style={{
             opacity: detailOpacity,
-            transition: `opacity ${FADE_MS}ms ease`,
+            visibility: detailOpacity === 0 && selected === null ? 'hidden' : 'visible'
           }}
           onClick={closeDetail}
         >
-          <div style={{ width: DETAIL_W, height: DETAIL_H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div 
+            style={{ 
+              width: DETAIL_W, 
+              height: DETAIL_H, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              transform: `scale(${0.96 + detailOpacity * 0.04})`,
+              transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
+            }}
+          >
             {detailItem.anh_chi_tiet?.url && (
               <img
                 src={detailItem.anh_chi_tiet.url}
                 alt={detailItem.anh_chi_tiet.alternativeText ?? ''}
-                style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.1))' }}
               />
             )}
           </div>
