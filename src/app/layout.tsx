@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import ClickEffect from "@/components/ClickEffect";
+import SideNav from "@/components/SideNav";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam",
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="vi" className={`${beVietnamPro.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-be-vietnam)]">
         <ClickEffect />
+        <SideNav />
         {children}
       </body>
     </html>

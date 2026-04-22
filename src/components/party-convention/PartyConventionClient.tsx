@@ -13,8 +13,10 @@ interface StrapiImage {
 interface DaiHoiItem {
   id: number
   mo_ta: string | null
+  link: string | null
   anh_dai_hoi: StrapiImage
   anh_chi_tiet: StrapiImage
+  thong_tin_chi_tiet?: StrapiImage
 }
 
 interface PageData {
@@ -80,7 +82,8 @@ function ScrollBar({
 export default function PartyConventionClient({ data }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const [currentIdx, setCurrentIdx] = useState(0)
-  const [view, setView] = useState<'list' | 'detail'>('list')
+  const [view, setView] = useState<'list' | 'detail' | 'info'>('list')
+  const [showIframe, setShowIframe] = useState(false)
   const [contentVisible, setContentVisible] = useState(true)
 
   const items = data?.data?.danh_sach_dai_hoi ?? []
@@ -94,6 +97,7 @@ export default function PartyConventionClient({ data }: Props) {
       anhNenChiTiet?.url,
       ...items.map(i => i.anh_dai_hoi?.url),
       ...items.map(i => i.anh_chi_tiet?.url),
+      ...items.map(i => i.thong_tin_chi_tiet?.url),
     ].filter(Boolean) as string[]
 
     urls.forEach(url => {
@@ -102,11 +106,17 @@ export default function PartyConventionClient({ data }: Props) {
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const transitionTo = useCallback((nextView: 'list' | 'detail', idx?: number) => {
+  const transitionTo = useCallback((nextView: 'list' | 'detail' | 'info', idx?: number) => {
     setContentVisible(false)
+    setShowIframe(false)
     setTimeout(() => {
       setView(nextView)
-      setSelected(nextView === 'detail' && idx !== undefined ? idx : null)
+      if (nextView === 'list') {
+        setSelected(null)
+      } else if (idx !== undefined) {
+        setSelected(idx)
+      }
+      
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setContentVisible(true))
       })
@@ -167,13 +177,21 @@ export default function PartyConventionClient({ data }: Props) {
   return (
     <section className="relative h-screen w-full overflow-hidden" onWheel={handleWheel}>
 
-      {/* ── Background layer 1: anh_nen_chi_tiet — luôn hiện, không bao giờ unmount ── */}
+      {/* ── Background layer 1: anh_nen_chi_tiet — hiện ở detail ── */}
       {anhNenChiTiet?.url && (
-        <img
-          src={anhNenChiTiet.url}
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-        />
+        <div
+          className="absolute inset-0"
+          style={{
+            opacity: view === 'detail' ? 1 : 0,
+            transition: `opacity ${TRANSITION_MS}ms ease`,
+          }}
+        >
+          <img
+            src={anhNenChiTiet.url}
+            alt=""
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+          />
+        </div>
       )}
 
       {/* ── Background layer 2: anh_nen (list bg) — fade in/out theo view ── */}
@@ -198,24 +216,93 @@ export default function PartyConventionClient({ data }: Props) {
 
         {/* DETAIL VIEW */}
         {view === 'detail' && detailItem && (
-          <div
-            className="h-full flex items-center justify-center gap-8 cursor-pointer"
-            onClick={() => transitionTo('list')}
-          >
-            <div className="w-full relative max-w-[80vw] flex-shrink-0">
+          <div className="relative h-full w-full flex flex-col items-center justify-center">
+             <button
+              onClick={() => transitionTo('list')}
+              className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 hover:bg-red-600 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+              aria-label="Quay lại"
+            >
+              <span className="text-2xl transition-transform group-hover:-translate-x-1">←</span>
+            </button>
+            <div 
+              className="relative max-w-[85vw] max-h-[85vh] cursor-pointer group"
+              onClick={() => transitionTo('info')}
+            >
               {detailItem.anh_chi_tiet?.url && (
                 <img
                   src={detailItem.anh_chi_tiet.url}
                   alt=""
-                  className="object-cover object-center"
+                  className="max-h-[85vh] w-auto object-contain drop-shadow-2xl rounded-lg transition-transform duration-500 group-hover:scale-[1.01]"
                 />
               )}
-              <div className="text-white absolute top-1/6 left-[52%]">
-                <div className="w-[90%] h-[500px] overflow-y-auto">
-                  {detailItem.mo_ta ?? ''}
+              <div className="text-white absolute top-1/6 left-[52%] pr-8">
+                <div className="w-full max-h-[50vh] overflow-y-auto custom-scrollbar pr-4 text-lg leading-relaxed">
+                   <div dangerouslySetInnerHTML={{ __html: detailItem.mo_ta ?? '' }} />
                 </div>
               </div>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 text-white px-4 py-2 rounded-full text-sm">
+                Nhấn để xem thông tin chi tiết
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* INFO VIEW */}
+        {view === 'info' && detailItem && (
+          <div className="relative h-full w-full bg-black">
+            <button
+              onClick={() => transitionTo('detail')}
+              className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 hover:bg-red-600 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+              aria-label="Quay lại"
+            >
+              <span className="text-2xl transition-transform group-hover:-translate-x-1">←</span>
+            </button>
+            
+            <div className="h-full w-full overflow-y-auto custom-scrollbar">
+              <div className="w-full flex justify-center">
+                {detailItem.thong_tin_chi_tiet?.url && (
+                  <img
+                    src={detailItem.thong_tin_chi_tiet.url}
+                    alt="Thông tin chi tiết"
+                    className="w-full h-auto cursor-pointer block"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const y = e.clientY - rect.top
+                      if (y > rect.height - 500) {
+                        if (detailItem.link) {
+                          setShowIframe(true)
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* IFRAME MODAL */}
+            {showIframe && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-12 animate-in fade-in zoom-in duration-300">
+                <div className="relative w-full h-full max-w-7xl bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                  <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-b">
+                    <span className="font-semibold text-gray-700">Tài liệu chi tiết</span>
+                    <button 
+                      onClick={() => setShowIframe(false)}
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-red-500 hover:text-white transition-colors text-gray-600 text-2xl font-bold"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="flex-1 w-full bg-white relative">
+                    <iframe
+                      src={detailItem.link!}
+                      className="absolute inset-0 w-full h-full border-none"
+                      title="Chi tiết"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -264,6 +351,23 @@ export default function PartyConventionClient({ data }: Props) {
         )}
 
       </div>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(245, 197, 24, 0.5);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(245, 197, 24, 0.8);
+        }
+      `}</style>
     </section>
   )
 }

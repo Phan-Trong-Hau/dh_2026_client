@@ -5,7 +5,6 @@ export default async function Page() {
   let homeData: any = null
   try {
     homeData = await getHome()
-    console.log(homeData);
   } catch {
     // fallback khi Strapi chưa có data
   }
