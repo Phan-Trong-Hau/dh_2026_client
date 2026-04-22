@@ -15,10 +15,16 @@ interface StrapiImage {
   }
 }
 
+interface SlideItem {
+  id: number
+  link: string
+  anh: StrapiImage
+}
+
 interface HomeData {
   anh_nen: StrapiImage
   anh_nen_slide: StrapiImage
-  danh_sach_slide: StrapiImage[]
+  danh_sach_trang: SlideItem[]
 }
 
 interface Props {
@@ -48,7 +54,7 @@ export default function HomeClient({ data }: Props) {
 
   const anhNen = data?.data?.anh_nen
   const anhNenSlide = data?.data?.anh_nen_slide
-  const danhSachSlide = data?.data?.danh_sach_slide ?? []
+  const danhSachTrang = data?.data?.danh_sach_trang ?? []
 
   return (
     <main className="flex flex-col">
@@ -79,7 +85,7 @@ export default function HomeClient({ data }: Props) {
         <div ref={slidesRef}>
           <SlideSection
             anhNenSlide={anhNenSlide ?? null}
-            danhSachSlide={danhSachSlide}
+            danhSachTrang={danhSachTrang}
             onBack={handleBack}
           />
         </div>

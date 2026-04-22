@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
+import Link from 'next/link'
 
 const AUTO_PLAY_DURATION = 5000
 
@@ -18,17 +18,23 @@ interface StrapiImage {
   alternativeText?: string
 }
 
+interface SlideItem {
+  id: number
+  link: string
+  anh: StrapiImage
+}
+
 interface Props {
   anhNenSlide: StrapiImage | null
-  danhSachSlide: StrapiImage[]
+  danhSachTrang: SlideItem[]
   onBack?: () => void
 }
 
-export default function SlideSection({ anhNenSlide, danhSachSlide, onBack }: Props) {
+export default function SlideSection({ anhNenSlide, danhSachTrang, onBack }: Props) {
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState<'left' | 'right'>('right')
 
-  const total = danhSachSlide.length
+  const total = danhSachTrang.length
 
   const goTo = useCallback(
     (index: number, dir: 'left' | 'right') => {
@@ -54,84 +60,92 @@ export default function SlideSection({ anhNenSlide, danhSachSlide, onBack }: Pro
 
   if (total === 0) return null
 
-  const currentSlide = danhSachSlide[current]
+  const currentItem = danhSachTrang[current]
+  const currentSlide = currentItem.anh
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {anhNenSlide?.url && (
-        <Image
+        <img
           src={anhNenSlide.url}
           alt="Nền slide"
-          fill
-          className="object-center"
-          priority
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
       )}
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="absolute top-14 left-1/2 -translate-x-1/2 z-20 transition-transform duration-200 hover:scale-110"
-          aria-label="Quay về"
-        >
-          <Image src={ICON_BACK} alt="Quay về" width={48} height={48} />
-        </button>
-      )}
-
       {/* Nội dung slide */}
       <div
         key={current}
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none"
         style={{
-          animation: `${direction === 'right' ? 'slide-in-right' : 'slide-in-left'} 0.4s ease-out forwards`,
+          animation: `${direction === 'right' ? 'slide-in-right' : 'slide-in-left'} 0.6s cubic-bezier(0.22, 1, 0.36, 1) both`,
         }}
       >
-        <div className="relative w-[75%] h-[75%] flex items-center justify-center">
-        {/* Nút quay về */}
-      
-          <img
-            src={currentSlide.url}
-            alt={currentSlide.alternativeText ?? `Slide ${current + 1}`}
-            className="object-center rounded-4xl!"
-          />
+        <div className="relative w-full h-full max-w-[95vw] max-h-screen flex items-center justify-center pointer-events-auto">
+          <Link href={currentItem.link} className="block relative h-full w-full flex items-center justify-center group">
+            <img
+              src={currentSlide.url}
+              alt={currentSlide.alternativeText ?? `Slide ${current + 1}`}
+              className="object-contain drop-shadow-2xl rounded-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+              style={{ maxHeight: '100%', maxWidth: '100%' }}
+            />
+            {/* Hover hint */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 text-white bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm text-sm">
+                Nhấn để xem chi tiết
+            </div>
+          </Link>
         </div>
       </div>
 
       {/* Nút trái */}
       <button
         onClick={() => go('prev')}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 transition-transform duration-200 hover:scale-110"
+        className="absolute left-8 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 hover:scale-110 active:scale-90 opacity-70 hover:opacity-100"
         aria-label="Slide trước"
       >
-        <Image src={ICON_LEFT} alt="Trước" width={48} height={48} />
+        <img src={ICON_LEFT} alt="Trước" width={48} />
       </button>
 
       {/* Nút phải */}
       <button
         onClick={() => go('next')}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 transition-transform duration-200 hover:scale-110"
+        className="absolute right-8 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 hover:scale-110 active:scale-90 opacity-70 hover:opacity-100"
         aria-label="Slide tiếp theo"
       >
-        <Image src={ICON_RIGHT} alt="Tiếp theo" width={48} height={48} />
+        <img src={ICON_RIGHT} alt="Tiếp theo" width={48} />
       </button>
 
       {/* Pagination dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
-        {danhSachSlide.map((_, i) => (
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-20">
+        {danhSachTrang.map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i, i > current ? 'right' : 'left')}
             aria-label={`Slide ${i + 1}`}
-            className="transition-transform duration-200 hover:scale-110"
+            className="transition-all duration-300 hover:scale-125"
           >
-            <Image
+            <img
               src={i === current ? ICON_DOT_ACTIVE : ICON_DOT_INACTIVE}
               alt={i === current ? 'Đang xem' : `Slide ${i + 1}`}
-              width={i === current ? 20 : 14}
-              height={i === current ? 20 : 14}
+              style={{ 
+                width: i === current ? 16 : 14, 
+                height: i === current ? 16 : 14,
+                transition: 'all 0.4s ease'
+              }}
             />
           </button>
         ))}
       </div>
+
+      <style jsx>{`
+        @keyframes slide-in-right {
+          0% { transform: translate3d(80px, 0, 0); opacity: 0; }
+          100% { transform: translate3d(0, 0, 0); opacity: 1; }
+        }
+        @keyframes slide-in-left {
+          0% { transform: translate3d(-80px, 0, 0); opacity: 0; }
+          100% { transform: translate3d(0, 0, 0); opacity: 1; }
+        }
+      `}</style>
 
      
     </section>
