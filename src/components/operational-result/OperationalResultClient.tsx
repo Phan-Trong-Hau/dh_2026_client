@@ -374,10 +374,10 @@ export default function OperationalResultClient({ data }: Props) {
       >
         <button
           onClick={closeMega}
-          className="fixed top-8 left-8 z-[80] w-12 h-12 flex items-center justify-center text-white bg-black/40 hover:bg-red-600 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+          className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
           aria-label="Quay lại"
         >
-          <span className="text-2xl transition-transform group-hover:-translate-x-1">←</span>
+          <span className="text-2xl mb-1 transition-transform">←</span>
         </button>
         
         <div className="w-full flex justify-center">

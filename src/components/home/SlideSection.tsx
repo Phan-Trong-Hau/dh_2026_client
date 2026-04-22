@@ -88,10 +88,6 @@ export default function SlideSection({ anhNenSlide, danhSachTrang, onBack }: Pro
               className="object-contain drop-shadow-2xl rounded-2xl transition-transform duration-500 group-hover:scale-[1.02]"
               style={{ maxHeight: '100%', maxWidth: '100%' }}
             />
-            {/* Hover hint */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 text-white bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm text-sm">
-                Nhấn để xem chi tiết
-            </div>
           </Link>
         </div>
       </div>

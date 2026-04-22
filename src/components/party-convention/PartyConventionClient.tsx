@@ -219,10 +219,10 @@ export default function PartyConventionClient({ data }: Props) {
           <div className="relative h-full w-full flex flex-col items-center justify-center">
              <button
               onClick={() => transitionTo('list')}
-              className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 hover:bg-red-600 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+               className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
               aria-label="Quay lại"
             >
-              <span className="text-2xl transition-transform group-hover:-translate-x-1">←</span>
+              <span className="text-2xl mb-1 transition-transform">←</span>
             </button>
             <div 
               className="relative max-w-[85vw] max-h-[85vh] cursor-pointer group"
@@ -240,9 +240,7 @@ export default function PartyConventionClient({ data }: Props) {
                    <div dangerouslySetInnerHTML={{ __html: detailItem.mo_ta ?? '' }} />
                 </div>
               </div>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 text-white px-4 py-2 rounded-full text-sm">
-                Nhấn để xem thông tin chi tiết
-              </div>
+             
             </div>
           </div>
         )}
@@ -252,10 +250,10 @@ export default function PartyConventionClient({ data }: Props) {
           <div className="relative h-full w-full bg-black">
             <button
               onClick={() => transitionTo('detail')}
-              className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 hover:bg-red-600 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+              className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
               aria-label="Quay lại"
             >
-              <span className="text-2xl transition-transform group-hover:-translate-x-1">←</span>
+              <span className="text-2xl mb-1 transition-transform">←</span>
             </button>
             
             <div className="h-full w-full overflow-y-auto custom-scrollbar">
@@ -268,7 +266,7 @@ export default function PartyConventionClient({ data }: Props) {
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect()
                       const y = e.clientY - rect.top
-                      if (y > rect.height - 500) {
+                      if (y > rect.height - (window.innerHeight - 100)) {
                         if (detailItem.link) {
                           setShowIframe(true)
                         }
@@ -281,17 +279,23 @@ export default function PartyConventionClient({ data }: Props) {
 
             {/* IFRAME MODAL */}
             {showIframe && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-12 animate-in fade-in zoom-in duration-300">
-                <div className="relative w-full h-full max-w-7xl bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                  <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-b">
-                    <span className="font-semibold text-gray-700">Tài liệu chi tiết</span>
-                    <button 
-                      onClick={() => setShowIframe(false)}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-red-500 hover:text-white transition-colors text-gray-600 text-2xl font-bold"
-                    >
-                      ×
-                    </button>
-                  </div>
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+                {/* Backdrop with faint blur */}
+                <div 
+                  className="absolute inset-0 bg-black/20 backdrop-blur-sm" 
+                  onClick={() => setShowIframe(false)}
+                />
+                
+                <div className="relative w-full h-full max-w-7xl bg-[#1a1a1a] rounded-[2rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col animate-in zoom-in-95 duration-500">
+                  {/* Floating Close Button */}
+                  <button 
+                    onClick={() => setShowIframe(false)}
+                    className="absolute top-6 right-6 z-[110] w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-red-600 backdrop-blur-md border border-white/20 text-white transition-all shadow-xl hover:scale-110 active:scale-95 group"
+                  >
+                    <span className="text-3xl mb-0.5 leading-none transition-transform">×</span>
+                  </button>
+
+                  {/* Iframe Container */}
                   <div className="flex-1 w-full bg-white relative">
                     <iframe
                       src={detailItem.link!}
