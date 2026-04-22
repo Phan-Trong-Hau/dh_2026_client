@@ -19,6 +19,7 @@ interface HoatDongItem {
   id: number
   anh_hoat_dong: StrapiImage
   anh_chi_tiet: StrapiImage
+  trang_chi_tiet?: StrapiImage
   mo_ta?: string | null
 }
 
@@ -98,6 +99,7 @@ export default function OperationalResultClient({ data }: Props) {
   // Detail: selected = index đang xem, detailOpacity điều khiển fade
   const [selected, setSelected] = useState<number | null>(null)
   const [detailOpacity, setDetailOpacity] = useState(0)
+  const [isMegaOpen, setIsMegaOpen] = useState(false)
 
   const items = data?.data?.danh_sach_hoat_dong ?? []
   const anhNen = data?.data?.anh_nen
@@ -107,6 +109,7 @@ export default function OperationalResultClient({ data }: Props) {
       anhNen?.url,
       ...items.map(i => i.anh_hoat_dong?.url),
       ...items.map(i => i.anh_chi_tiet?.url),
+      ...items.map(i => i.trang_chi_tiet?.url),
     ].filter(Boolean) as string[]
     urls.forEach(url => {
       const img = new window.Image()
@@ -167,7 +170,16 @@ export default function OperationalResultClient({ data }: Props) {
   // Đóng detail: fade out rồi mới unmount
   const closeDetail = useCallback(() => {
     setDetailOpacity(0)
+    setIsMegaOpen(false)
     setTimeout(() => setSelected(null), 600)
+  }, [])
+
+  const openMega = useCallback(() => {
+    setIsMegaOpen(true)
+  }, [])
+
+  const closeMega = useCallback(() => {
+    setIsMegaOpen(false)
   }, [])
 
   const currentItem = items[currentIdx]
@@ -188,11 +200,19 @@ export default function OperationalResultClient({ data }: Props) {
 
       {/* Background */}
       {anhNen?.url && (
-        <img 
-          src={anhNen.url} 
-          alt="" 
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} 
-        />
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            opacity: isMegaOpen ? 0 : 1,
+            transition: `opacity ${FADE_MS}ms ease`
+          }}
+        >
+          <img 
+            src={anhNen.url} 
+            alt="" 
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} 
+          />
+        </div>
       )}
 
       {/* ── LIST VIEW — luôn trong DOM, không bao giờ unmount ── */}
@@ -309,8 +329,9 @@ export default function OperationalResultClient({ data }: Props) {
         <div
           className="absolute inset-0 top-18 z-20 flex items-center justify-center cursor-pointer transition-opacity duration-600"
           style={{
-            opacity: detailOpacity,
-            visibility: detailOpacity === 0 && selected === null ? 'hidden' : 'visible'
+            opacity: isMegaOpen ? 0 : detailOpacity,
+            visibility: (detailOpacity === 0 && selected === null) || isMegaOpen ? 'hidden' : 'visible',
+            pointerEvents: isMegaOpen ? 'none' : 'auto'
           }}
           onClick={closeDetail}
         >
@@ -324,6 +345,12 @@ export default function OperationalResultClient({ data }: Props) {
               transform: `scale(${0.96 + detailOpacity * 0.04})`,
               transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
+            onClick={(e) => {
+              if (detailItem.trang_chi_tiet) {
+                e.stopPropagation()
+                openMega()
+              }
+            }}
           >
             {detailItem.anh_chi_tiet?.url && (
               <img
@@ -335,6 +362,78 @@ export default function OperationalResultClient({ data }: Props) {
           </div>
         </div>
       )}
+
+      {/* ── MEGA VIEW — Always in DOM for pre-loading trick ── */}
+      <div 
+        className="fixed inset-0 z-[70] bg-black overflow-y-auto custom-scrollbar transition-all duration-500 ease-out"
+        style={{
+          opacity: isMegaOpen ? 1 : 0,
+          visibility: isMegaOpen ? 'visible' : 'hidden',
+          pointerEvents: isMegaOpen ? 'auto' : 'none',
+        }}
+      >
+        <button
+          onClick={closeMega}
+          className="fixed top-8 left-8 z-[80] w-12 h-12 flex items-center justify-center text-white bg-black/40 hover:bg-red-600 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
+          aria-label="Quay lại"
+        >
+          <span className="text-2xl transition-transform group-hover:-translate-x-1">←</span>
+        </button>
+        
+        <div className="w-full flex justify-center">
+          {items.map((item, idx) => (
+            <div 
+              key={idx} 
+              className="w-full"
+              style={{ display: selected === idx ? 'block' : 'none' }}
+            >
+              {item.trang_chi_tiet?.url && (
+                <img
+                  src={item.trang_chi_tiet.url}
+                  alt="Trang chi tiết"
+                  className="w-full h-auto block"
+                  loading="eager"
+                  decoding="sync"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Hidden Preloader Trick: Renders all images with 0 opacity to force browser loading/decoding */}
+        <div 
+          className="fixed inset-0 pointer-events-none overflow-hidden" 
+          style={{ opacity: 0, zIndex: -100 }}
+        >
+          {items.map((item, idx) => (
+            item.trang_chi_tiet?.url && (
+              <img 
+                key={`preload-${idx}`} 
+                src={item.trang_chi_tiet.url} 
+                alt="" 
+                loading="eager"
+              />
+            )
+          ))}
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(245, 197, 24, 0.5);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(245, 197, 24, 0.8);
+        }
+      `}</style>
 
     </section>
   )
