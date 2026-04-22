@@ -13,6 +13,7 @@ interface StrapiImage {
 interface DaiHoiItem {
   id: number
   mo_ta: string | null
+  mo_ta_anh?: StrapiImage
   link: string | null
   anh_dai_hoi: StrapiImage
   anh_chi_tiet: StrapiImage
@@ -97,6 +98,7 @@ export default function PartyConventionClient({ data }: Props) {
       anhNenChiTiet?.url,
       ...items.map(i => i.anh_dai_hoi?.url),
       ...items.map(i => i.anh_chi_tiet?.url),
+      ...items.map(i => i.mo_ta_anh?.url),
       ...items.map(i => i.thong_tin_chi_tiet?.url),
     ].filter(Boolean) as string[]
 
@@ -232,12 +234,18 @@ export default function PartyConventionClient({ data }: Props) {
                 <img
                   src={detailItem.anh_chi_tiet.url}
                   alt=""
-                  className="max-h-[85vh] w-auto object-contain drop-shadow-2xl rounded-lg transition-transform duration-500 group-hover:scale-[1.01]"
+                  className="max-h-[85vh] w-auto object-contain drop-shadow-2xl rounded-lg transition-transform duration-500"
                 />
               )}
-              <div className="text-white absolute top-1/6 left-[52%] pr-8">
-                <div className="w-full max-h-[50vh] overflow-y-auto custom-scrollbar pr-4 text-lg leading-relaxed">
-                   <div dangerouslySetInnerHTML={{ __html: detailItem.mo_ta ?? '' }} />
+              <div className="text-white absolute top-1/6 left-[52.5%] w-[43.5%]">
+                <div className="w-full max-h-[53vh] overflow-y-auto custom-scrollbar pr-4">
+                   {detailItem.mo_ta_anh?.url && (
+                     <img 
+                       src={detailItem.mo_ta_anh.url} 
+                       alt="" 
+                       className="w-full h-auto block"
+                     />
+                   )}
                 </div>
               </div>
              
