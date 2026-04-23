@@ -17,12 +17,12 @@ export default function SideNav() {
     { name: 'Trang chủ', href: '/' },
     { name: 'Kết quả hoạt động', href: '/ket-qua-hoat-dong' },
     { name: 'Các kỳ đại hội', href: '/cac-ky-dai-hoi' },
-    { name: 'Ban lãnh đạo', href: '/ban-lanh-dao' },
+    { name: 'Chủ tịch UB TW MTTQ VN các thời kỳ', href: '/ban-lanh-dao' },
   ]
 
   return (
     <nav 
-      className="fixed left-0 top-1/3 -translate-y-1/2 z-[100] flex items-center transition-transform duration-500 ease-out"
+      className="fixed left-0 top-[45vh] -translate-y-1/2 z-[100] flex items-center transition-transform duration-500 ease-out"
       style={{ transform: `translateY(-50%) translateX(${isOpen ? '0' : '-100%'})` }}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
