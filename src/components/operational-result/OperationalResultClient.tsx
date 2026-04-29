@@ -409,22 +409,17 @@ export default function OperationalResultClient({ data }: Props) {
           ))}
         </div>
 
-        {/* Hidden Preloader Trick: Renders all images with 0 opacity to force browser loading/decoding */}
-        <div 
-          className="fixed inset-0 pointer-events-none overflow-hidden" 
-          style={{ opacity: 0, zIndex: -100 }}
-        >
-          {items.map((item, idx) => (
-            item.trang_chi_tiet?.url && (
-              <img 
-                key={`preload-${idx}`} 
-                src={item.trang_chi_tiet.url} 
-                alt="" 
-                loading="eager"
-              />
-            )
-          ))}
-        </div>
+      {/* Hidden Preloader Trick: Renders all images with 0 opacity to force browser loading/decoding */}
+      <div className="fixed inset-0 pointer-events-none opacity-0 -z-10 overflow-hidden" aria-hidden="true">
+        {anhNen?.url && <img src={anhNen.url} alt="" loading="eager" />}
+        {items.map((item, idx) => (
+          <div key={`preload-${idx}`}>
+            <img src={item.anh_hoat_dong.url} alt="" loading="eager" />
+            <img src={item.anh_chi_tiet.url} alt="" loading="eager" />
+            {item.trang_chi_tiet?.url && <img src={item.trang_chi_tiet.url} alt="" loading="eager" />}
+          </div>
+        ))}
+      </div>
       </div>
 
       <TechnicalLoader isVisible={isInternalLoading} />

@@ -105,7 +105,7 @@ export default function LeadershipClient({ data }: Props) {
             onClick={() => openDetail(i)}
             style={{
               opacity: mounted ? undefined : 0,
-              animationDelay: `${i * 0.5}s`,
+              animationDelay: `${i * 0.3}s`,
             }}
           >
             {item.anh_chan_dung?.url && (

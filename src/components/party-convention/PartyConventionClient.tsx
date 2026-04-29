@@ -394,6 +394,20 @@ export default function PartyConventionClient({ data }: Props) {
 
       </div>
 
+      {/* Hidden Preloader for all images in this section */}
+      <div className="fixed inset-0 pointer-events-none opacity-0 -z-10 overflow-hidden" aria-hidden="true">
+        {anhNen?.url && <img src={anhNen.url} alt="" loading="eager" />}
+        {anhNenChiTiet?.url && <img src={anhNenChiTiet.url} alt="" loading="eager" />}
+        {items.map((item, idx) => (
+          <div key={`pre-${idx}`}>
+            <img src={item.anh_dai_hoi.url} alt="" loading="eager" />
+            <img src={item.anh_chi_tiet.url} alt="" loading="eager" />
+            {item.mo_ta_anh?.url && <img src={item.mo_ta_anh.url} alt="" loading="eager" />}
+            {item.thong_tin_chi_tiet?.url && <img src={item.thong_tin_chi_tiet.url} alt="" loading="eager" />}
+          </div>
+        ))}
+      </div>
+
       <TechnicalLoader isVisible={isInternalLoading} />
 
       <style jsx global>{`

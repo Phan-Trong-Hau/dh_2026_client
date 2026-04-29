@@ -69,9 +69,22 @@ export default function SlideSection({ anhNenSlide, danhSachTrang, onBack }: Pro
         <img
           src={anhNenSlide.url}
           alt="Nền slide"
+          className="transition-opacity duration-1000"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
       )}
+
+      {/* Hidden Preloader: Buộc trình duyệt tải trước tất cả các ảnh slide */}
+      <div className="fixed inset-0 pointer-events-none opacity-0 -z-10 overflow-hidden" aria-hidden="true">
+        {danhSachTrang.map((item, idx) => (
+          <img key={`preload-${idx}`} src={item.anh.url} alt="" loading="eager" />
+        ))}
+        {/* Preload các icon điều hướng */}
+        <img src={ICON_LEFT} alt="" />
+        <img src={ICON_RIGHT} alt="" />
+        <img src={ICON_DOT_ACTIVE} alt="" />
+        <img src={ICON_DOT_INACTIVE} alt="" />
+      </div>
       {/* Nội dung slide */}
       <div
         key={current}
