@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import TechnicalLoader from '../TechnicalLoader'
 
 const SLIDE_MS = 650
 const FADE_MS = 400
@@ -100,6 +101,7 @@ export default function OperationalResultClient({ data }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const [detailOpacity, setDetailOpacity] = useState(0)
   const [isMegaOpen, setIsMegaOpen] = useState(false)
+  const [isInternalLoading, setIsInternalLoading] = useState(false)
 
   const items = data?.data?.danh_sach_hoat_dong ?? []
   const anhNen = data?.data?.anh_nen
@@ -175,7 +177,11 @@ export default function OperationalResultClient({ data }: Props) {
   }, [])
 
   const openMega = useCallback(() => {
+    setIsInternalLoading(true)
     setIsMegaOpen(true)
+    
+    // Fallback: Nếu ảnh đã load xong hoặc lỗi, tự tắt sau 2s
+    setTimeout(() => setIsInternalLoading(false), 2000)
   }, [])
 
   const closeMega = useCallback(() => {
@@ -392,6 +398,9 @@ export default function OperationalResultClient({ data }: Props) {
                   src={item.trang_chi_tiet.url}
                   alt="Trang chi tiết"
                   className="w-full h-auto block"
+                  onLoad={(e) => {
+                    if (selected === idx) setIsInternalLoading(false)
+                  }}
                   loading="eager"
                   decoding="sync"
                 />
@@ -417,6 +426,8 @@ export default function OperationalResultClient({ data }: Props) {
           ))}
         </div>
       </div>
+
+      <TechnicalLoader isVisible={isInternalLoading} />
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
+import TechnicalLoader from '../TechnicalLoader'
 
 const TRANSITION_MS = 350
 
@@ -86,6 +87,8 @@ export default function PartyConventionClient({ data }: Props) {
   const [view, setView] = useState<'list' | 'detail' | 'info'>('list')
   const [showIframe, setShowIframe] = useState(false)
   const [contentVisible, setContentVisible] = useState(true)
+  const [isInternalLoading, setIsInternalLoading] = useState(false)
+  const [isInfoImageLoaded, setIsInfoImageLoaded] = useState(false)
 
   const items = data?.data?.danh_sach_dai_hoi ?? []
   const anhNen = data?.data?.anh_nen
@@ -109,8 +112,17 @@ export default function PartyConventionClient({ data }: Props) {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const transitionTo = useCallback((nextView: 'list' | 'detail' | 'info', idx?: number) => {
+    // Chỉ hiện hiệu ứng loading cho view 'info' (ảnh duy nhất dài)
+    const needsLoading = nextView === 'info'
+    
     setContentVisible(false)
     setShowIframe(false)
+    
+    if (needsLoading) {
+      setIsInternalLoading(true)
+      setIsInfoImageLoaded(false)
+    }
+    
     setTimeout(() => {
       setView(nextView)
       if (nextView === 'list') {
@@ -119,10 +131,14 @@ export default function PartyConventionClient({ data }: Props) {
         setSelected(idx)
       }
       
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setContentVisible(true))
-      })
-    }, TRANSITION_MS)
+      // Nếu không phải info view, tắt loading ngay
+      if (!needsLoading) {
+        setIsInternalLoading(false)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setContentVisible(true))
+        })
+      }
+    }, needsLoading ? 300 : TRANSITION_MS) // Giảm thời gian chờ setTimeout để loader hiện lên sớm hơn
   }, [])
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -271,6 +287,20 @@ export default function PartyConventionClient({ data }: Props) {
                     src={detailItem.thong_tin_chi_tiet.url}
                     alt="Thông tin chi tiết"
                     className="w-full h-auto cursor-pointer block"
+                    onLoad={(e) => {
+                      setIsInfoImageLoaded(true)
+                      setIsInternalLoading(false)
+                      requestAnimationFrame(() => {
+                        requestAnimationFrame(() => setContentVisible(true))
+                      })
+                    }}
+                    // Fix cho trường hợp ảnh đã cached
+                    onPointerEnter={(e) => {
+                       if ((e.target as HTMLImageElement).complete) {
+                          setIsInternalLoading(false)
+                          setContentVisible(true)
+                       }
+                    }}
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect()
                       const y = e.clientY - rect.top
@@ -363,6 +393,8 @@ export default function PartyConventionClient({ data }: Props) {
         )}
 
       </div>
+
+      <TechnicalLoader isVisible={isInternalLoading} />
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {

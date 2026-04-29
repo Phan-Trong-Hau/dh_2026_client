@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`${beVietnamPro.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-be-vietnam)]">
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-be-vietnam)] bg-black text-white">
         <ClickEffect />
         <SideNav />
         {children}
