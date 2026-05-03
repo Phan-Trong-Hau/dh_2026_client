@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import TechnicalLoader from '../TechnicalLoader'
+import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
 
 interface StrapiImage {
   url: string
@@ -39,9 +41,8 @@ export default function LeadershipClient({ data }: Props) {
   const anhNen = data?.data?.anh_nen
   const anhNenChiTiet = data?.data?.anh_nen_chi_tiet
 
-  // Preload images for maximum smoothness
-  useEffect(() => {
-    const urls = [
+  const preloadUrls = useMemo(() => {
+    return [
       anhNen?.url,
       ...items.flatMap(i => [
         i.anh_chan_dung?.url, 
@@ -49,12 +50,9 @@ export default function LeadershipClient({ data }: Props) {
         i.anh_nen_chi_tiet?.url
       ])
     ].filter(Boolean) as string[]
-    
-    urls.forEach(url => {
-      const img = new window.Image()
-      img.src = url
-    })
   }, [items, anhNen])
+
+  const { isLoaded: isAssetsLoaded } = useImagePreloader(preloadUrls)
 
   const openDetail = useCallback((idx: number) => {
     setSelected(idx)
@@ -202,6 +200,7 @@ export default function LeadershipClient({ data }: Props) {
           50% { transform: translate(-50%, -10px); }
         }
       `}</style>
+      <TechnicalLoader isVisible={!isAssetsLoaded} />
     </section>
   )
 }

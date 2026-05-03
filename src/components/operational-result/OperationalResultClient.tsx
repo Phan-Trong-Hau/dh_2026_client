@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import TechnicalLoader from '../TechnicalLoader'
+import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
 
 const SLIDE_MS = 650
 const FADE_MS = 400
@@ -106,18 +107,16 @@ export default function OperationalResultClient({ data }: Props) {
   const items = data?.data?.danh_sach_hoat_dong ?? []
   const anhNen = data?.data?.anh_nen
 
-  useEffect(() => {
-    const urls = [
+  const preloadUrls = useMemo(() => {
+    return [
       anhNen?.url,
       ...items.map(i => i.anh_hoat_dong?.url),
       ...items.map(i => i.anh_chi_tiet?.url),
       ...items.map(i => i.trang_chi_tiet?.url),
     ].filter(Boolean) as string[]
-    urls.forEach(url => {
-      const img = new window.Image()
-      img.src = url
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [anhNen?.url, items])
+
+  const { isLoaded: isAssetsLoaded } = useImagePreloader(preloadUrls)
 
   const navigate = useCallback((toIdx: number, dir: 'left' | 'right') => {
     if (slidingRef.current || toIdx === currentIdx) return
@@ -203,6 +202,11 @@ export default function OperationalResultClient({ data }: Props) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
+      {/* ── INITIAL LOAD FADE ── */}
+      <div 
+        className="absolute inset-0 z-0 transition-opacity duration-1000 ease-out"
+        style={{ opacity: isAssetsLoaded ? 1 : 0 }}
+      >
 
       {/* Background */}
       {anhNen?.url && (
@@ -409,20 +413,11 @@ export default function OperationalResultClient({ data }: Props) {
           ))}
         </div>
 
-      {/* Hidden Preloader Trick: Renders all images with 0 opacity to force browser loading/decoding */}
-      <div className="fixed inset-0 pointer-events-none opacity-0 -z-10 overflow-hidden" aria-hidden="true">
-        {anhNen?.url && <img src={anhNen.url} alt="" loading="eager" />}
-        {items.map((item, idx) => (
-          <div key={`preload-${idx}`}>
-            <img src={item.anh_hoat_dong.url} alt="" loading="eager" />
-            <img src={item.anh_chi_tiet.url} alt="" loading="eager" />
-            {item.trang_chi_tiet?.url && <img src={item.trang_chi_tiet.url} alt="" loading="eager" />}
-          </div>
-        ))}
-      </div>
       </div>
 
-      <TechnicalLoader isVisible={isInternalLoading} />
+      </div>
+
+      <TechnicalLoader isVisible={!isAssetsLoaded || isInternalLoading} />
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {

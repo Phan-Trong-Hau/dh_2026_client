@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import TechnicalLoader from '../TechnicalLoader'
+import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
 
 const TRANSITION_MS = 350
 
@@ -94,9 +95,8 @@ export default function PartyConventionClient({ data }: Props) {
   const anhNen = data?.data?.anh_nen
   const anhNenChiTiet = data?.data?.anh_nen_chi_tiet
 
-  // Preload tất cả ảnh ngay khi mount
-  useEffect(() => {
-    const urls = [
+  const preloadUrls = useMemo(() => {
+    return [
       anhNen?.url,
       anhNenChiTiet?.url,
       ...items.map(i => i.anh_dai_hoi?.url),
@@ -104,12 +104,9 @@ export default function PartyConventionClient({ data }: Props) {
       ...items.map(i => i.mo_ta_anh?.url),
       ...items.map(i => i.thong_tin_chi_tiet?.url),
     ].filter(Boolean) as string[]
+  }, [anhNen?.url, anhNenChiTiet?.url, items])
 
-    urls.forEach(url => {
-      const img = new window.Image()
-      img.src = url
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const { isLoaded: isAssetsLoaded } = useImagePreloader(preloadUrls)
 
   const transitionTo = useCallback((nextView: 'list' | 'detail' | 'info', idx?: number) => {
     // Chỉ hiện hiệu ứng loading cho view 'info' (ảnh duy nhất dài)
@@ -194,6 +191,11 @@ export default function PartyConventionClient({ data }: Props) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden" onWheel={handleWheel}>
+      {/* ── INITIAL LOAD FADE ── */}
+      <div 
+        className="absolute inset-0 z-0 transition-opacity duration-1000 ease-out"
+        style={{ opacity: isAssetsLoaded ? 1 : 0 }}
+      >
 
       {/* ── Background layer 1: anh_nen_chi_tiet — hiện ở detail ── */}
       {anhNenChiTiet?.url && (
@@ -394,21 +396,10 @@ export default function PartyConventionClient({ data }: Props) {
 
       </div>
 
-      {/* Hidden Preloader for all images in this section */}
-      <div className="fixed inset-0 pointer-events-none opacity-0 -z-10 overflow-hidden" aria-hidden="true">
-        {anhNen?.url && <img src={anhNen.url} alt="" loading="eager" />}
-        {anhNenChiTiet?.url && <img src={anhNenChiTiet.url} alt="" loading="eager" />}
-        {items.map((item, idx) => (
-          <div key={`pre-${idx}`}>
-            <img src={item.anh_dai_hoi.url} alt="" loading="eager" />
-            <img src={item.anh_chi_tiet.url} alt="" loading="eager" />
-            {item.mo_ta_anh?.url && <img src={item.mo_ta_anh.url} alt="" loading="eager" />}
-            {item.thong_tin_chi_tiet?.url && <img src={item.thong_tin_chi_tiet.url} alt="" loading="eager" />}
-          </div>
-        ))}
+
       </div>
 
-      <TechnicalLoader isVisible={isInternalLoading} />
+      <TechnicalLoader isVisible={!isAssetsLoaded || isInternalLoading} />
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {

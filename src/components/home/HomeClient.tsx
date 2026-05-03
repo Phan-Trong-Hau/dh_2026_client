@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import Image from 'next/image'
 import RotatingCircle from './RotatingCircle'
 import SlideSection from './SlideSection'
+import TechnicalLoader from '../TechnicalLoader'
+import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
 
 interface StrapiImage {
   url: string
@@ -56,8 +58,22 @@ export default function HomeClient({ data }: Props) {
   const anhNenSlide = data?.data?.anh_nen_slide
   const danhSachTrang = data?.data?.danh_sach_trang ?? []
 
+  const preloadUrls = useMemo(() => {
+    return [
+      anhNen?.url,
+      anhNenSlide?.url,
+      ...danhSachTrang.map(s => s.anh?.url),
+    ].filter(Boolean) as string[]
+  }, [anhNen?.url, anhNenSlide?.url, danhSachTrang])
+
+  const { isLoaded: isAssetsLoaded } = useImagePreloader(preloadUrls)
+
   return (
     <main className="flex flex-col">
+      <div 
+        className="transition-opacity duration-1000 ease-out"
+        style={{ opacity: isAssetsLoaded ? 1 : 0 }}
+      >
       {/* ── HERO ── */}
       <section ref={heroRef} className="relative h-screen overflow-hidden">
         {/* Ảnh nền hero từ Strapi */}
@@ -90,6 +106,8 @@ export default function HomeClient({ data }: Props) {
           />
         </div>
       )}
+      </div>
+      <TechnicalLoader isVisible={!isAssetsLoaded} />
     </main>
   )
 }
