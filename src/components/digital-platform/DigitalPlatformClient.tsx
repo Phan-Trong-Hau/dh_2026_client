@@ -154,7 +154,7 @@ export default function DigitalPlatformClient({ data }: Props) {
                           onClick={() => handleSelectPlatform({ ...platform, gIdx })}
                         >
                           {platform.anh_nen?.url && (
-                            <div className="relative w-full h-full overflow-hidden">
+                            <div className="relative w-full group h-full overflow-hidden">
                               {/* Background Frame (anh_nen) */}
                               <img
                                 src={getStrapiImageUrl(platform.anh_nen.url)}
@@ -168,7 +168,7 @@ export default function DigitalPlatformClient({ data }: Props) {
                                   <img 
                                     src={getStrapiImageUrl(platform.anh_chi_tiet.url)}
                                     alt="Detail Preview"
-                                    className="max-w-full max-h-[60%] mb-4 object-contain"
+                                    className="max-w-full group-hover:scale-105 transition-transform duration-300 max-h-[60%] mb-4 object-contain"
                                   />
                                 </div>
                               )}
