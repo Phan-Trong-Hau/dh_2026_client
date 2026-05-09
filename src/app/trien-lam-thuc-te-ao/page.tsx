@@ -1,6 +1,7 @@
 import React from 'react'
 import { getHomeV2 } from '@/lib/api/home'
 import BackButton from '@/components/BackButton'
+import Link from 'next/link'
 
 export default async function Page() {
   let vrUrl = ""
