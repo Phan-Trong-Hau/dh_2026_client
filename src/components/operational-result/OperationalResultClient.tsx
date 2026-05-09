@@ -228,7 +228,7 @@ export default function OperationalResultClient({ data }: Props) {
 
       {/* ── LIST VIEW — luôn trong DOM, không bao giờ unmount ── */}
       <div
-        className="relative z-10 w-full flex flex-col items-center mt-28"
+        className="relative z-10 w-full flex flex-col items-center mt-[15vh]"
         style={{
           pointerEvents: selected !== null ? 'none' : 'auto',
         }}
@@ -338,7 +338,7 @@ export default function OperationalResultClient({ data }: Props) {
       {/* ── DETAIL OVERLAY — fade in/out trên top, list không bị unmount ── */}
       {detailItem && (
         <div
-          className="absolute inset-0 top-18 z-20 flex items-center justify-center cursor-pointer transition-opacity duration-600"
+          className="absolute inset-0 top-6 z-20 flex items-center justify-center cursor-pointer transition-opacity duration-600"
           style={{
             opacity: isMegaOpen ? 0 : detailOpacity,
             visibility: (detailOpacity === 0 && selected === null) || isMegaOpen ? 'hidden' : 'visible',
