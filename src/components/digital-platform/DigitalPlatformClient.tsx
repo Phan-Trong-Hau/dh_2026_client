@@ -47,12 +47,13 @@ import { useRouter, useParams } from 'next/navigation'
 
 interface Props {
   data: { data: PageData } | null
+  initialSlug?: string
 }
 
-export default function DigitalPlatformClient({ data }: Props) {
+export default function DigitalPlatformClient({ data, initialSlug }: Props) {
   const router = useRouter()
   const params = useParams()
-  const slug = params?.slug as string | undefined
+  const slug = (initialSlug || params?.slug) as string | undefined
 
   const [view, setView] = useState<'listing' | 'detail'>('listing')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
