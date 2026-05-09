@@ -129,7 +129,7 @@ export default function DigitalPlatformClient({ data }: Props) {
                   <div key={group.id} className="flex flex-col gap-8 relative">
                     {/* Group Header Image - Sticky */}
                     {group.anh?.url && (
-                      <div className="w-full sticky top-0 z-30">
+                      <div className="w-full sticky -top-1.5 z-30 h-20">
                         <img 
                           src={getStrapiImageUrl(group.anh.url)} 
                           alt={group.ten_nhom}
@@ -138,8 +138,11 @@ export default function DigitalPlatformClient({ data }: Props) {
                       </div>
                     )}
 
-                    {/* Platforms Grid - 3 Columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Platforms Grid - 3 Columns with Fade Mask */}
+                    <div 
+                      className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                    
+                    >
                       {group.danh_sach_nen_tang.map((platform, pIdx) => (
                         <motion.div
                           key={`${platform.id}-${pIdx}`}
