@@ -59,7 +59,7 @@ export default function DigitalPlatformClient({ data }: Props) {
   const [activeGroupIndex, setActiveGroupIndex] = useState<number>(0)
 
   const [activeMode, setActiveMode] = useState<'video' | 'document' | 'link' | null>(null)
-  const [isDialExpanded, setIsDialExpanded] = useState(false)
+  const [isDialExpanded, setIsDialExpanded] = useState(true)
 
   const rawData = data?.data
   const anhNen = rawData?.anh_nen
@@ -98,7 +98,7 @@ export default function DigitalPlatformClient({ data }: Props) {
     router.push('/nen-tang-so-tieu-bieu')
   }
 
-  const DEFAULT_URL = "https://www.youtube.com/watch?v=uEQ7fH7ViXo&list=RDuEQ7fH7ViXo&start_radio=1"
+  const DEFAULT_URL = "https://www.youtube.com/watch?v=VU7RUVLIxtg"
 
   // Preload all images
   const preloadUrls = useMemo(() => {
@@ -144,6 +144,7 @@ export default function DigitalPlatformClient({ data }: Props) {
         {view === 'detail' && <div className="absolute inset-0 bg-black/10 pointer-events-none" />}
       </div>
 
+
       <AnimatePresence mode="wait">
         {view === 'listing' ? (
           <motion.div
@@ -151,8 +152,10 @@ export default function DigitalPlatformClient({ data }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="relative z-10 w-full h-screen flex flex-col pt-32 pb-10"
+            className="relative z-10 w-full h-screen flex flex-col pb-10"
           >
+      <div className='h-[23vh]'></div>
+
             <div className="w-full px-10 overflow-y-auto custom-scrollbar flex-1">
               <div className="max-w-6xl mx-auto flex flex-col gap-16">
                 {groups.map((group, gIdx) => (
@@ -192,12 +195,18 @@ export default function DigitalPlatformClient({ data }: Props) {
                               />
                               
                               {/* Detail Preview (anh_chi_tiet) */}
-                              {platform.anh_chi_tiet?.url && (
+                              {platform.anh_chi_tiet?.url ? (
                                 <div className="absolute inset-4 flex items-end justify-center">
                                   <img 
                                     src={getStrapiImageUrl(platform.anh_chi_tiet.url)}
                                     alt="Detail Preview"
                                     className="max-w-full group-hover:scale-105 transition-transform duration-300 max-h-[60%] mb-4 object-contain"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="absolute inset-4 flex items-end justify-center">
+                                  <div
+                                    className="max-w-full group-hover:scale-105 bg-white h-[500px] w-[100px] transition-transform duration-300 max-h-[60%] mb-4 object-contain"
                                   />
                                 </div>
                               )}
@@ -291,7 +300,9 @@ export default function DigitalPlatformClient({ data }: Props) {
               </div>
 
               {/* Main Content Area */}
-              <div className="flex-1 relative flex items-center justify-center p-20">
+              <div className="flex-1 relative overflow-hidden">
+                {/* Scrollable Content Container */}
+                <div className="absolute inset-0 overflow-y-auto custom-scrollbar px-[12vw] py-[10vh] flex justify-center items-start">
                  {selectedPlatform && (
                     <AnimatePresence mode="wait">
                       {activeMode === 'video' ? (
@@ -300,7 +311,7 @@ export default function DigitalPlatformClient({ data }: Props) {
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.95 }}
-                          className="w-full aspect-video max-w-6xl bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+                          className="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
                         >
                           <iframe
                             src={(selectedPlatform.link_video || selectedPlatform.link || DEFAULT_URL).replace('watch?v=', 'embed/').split('&')[0]}
@@ -309,25 +320,33 @@ export default function DigitalPlatformClient({ data }: Props) {
                           />
                         </motion.div>
                       ) : (
-                        <motion.img
+                        <>
+                        {selectedPlatform.anh_chi_tiet?.url ? (
+                           <motion.img
                           key={`image-${selectedPlatform.id}`}
                           initial={{ opacity: 0, scale: 0.98 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 1.02 }}
                           src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url)}
                           alt="Detail"
-                          className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                          className="w-full h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                         />
+                        ) : (
+                          <p>Chưa có hình ảnh</p>
+                        )}
+                        </>
+                       
                       )}
                     </AnimatePresence>
                  )}
+                </div>
 
                  {/* Floating Right Icons Dial - Corner Expansion effect */}
                  <div className="absolute right-2 bottom-2 z-50">
                     <motion.div 
                       className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center"
                       animate={{ 
-                        scale: isDialExpanded ? 0.8 : 0.6,
+                        scale: isDialExpanded ? 0.7 : 0.6,
                         x: isDialExpanded ? 0 : 0,
                         y: isDialExpanded ? 0 : 0
                       }}
@@ -353,7 +372,7 @@ export default function DigitalPlatformClient({ data }: Props) {
                               animate="visible"
                               exit="hidden"
                               variants={{
-                                visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+                                visible: { transition: { staggerChildren: 0.03, delayChildren: 0, staggerDirection: -1 } },
                                 hidden: { transition: { staggerChildren: 0.03, staggerDirection: -1 } }
                               }}
                             >
