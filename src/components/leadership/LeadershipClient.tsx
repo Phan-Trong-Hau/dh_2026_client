@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import TechnicalLoader from '../TechnicalLoader'
 import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
+import BackButton from '../BackButton'
 
 interface StrapiImage {
   url: string
@@ -140,6 +141,8 @@ export default function LeadershipClient({ data }: Props) {
             )}
             <div className="absolute inset-0 bg-black/50" />
           </div>
+
+          <BackButton onClick={closeDetail} />
 
           {/* Close button area */}
           <div 

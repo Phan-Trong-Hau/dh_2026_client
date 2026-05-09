@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import TechnicalLoader from '../TechnicalLoader'
 import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
+import BackButton from '../BackButton'
 
 const SLIDE_MS = 650
 const FADE_MS = 400
@@ -382,13 +383,7 @@ export default function OperationalResultClient({ data }: Props) {
           pointerEvents: isMegaOpen ? 'auto' : 'none',
         }}
       >
-        <button
-          onClick={closeMega}
-          className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
-          aria-label="Quay lại"
-        >
-          <span className="text-2xl mb-1 transition-transform">←</span>
-        </button>
+        <BackButton onClick={closeMega} />
         
         <div className="w-full flex justify-center">
           {items.map((item, idx) => (

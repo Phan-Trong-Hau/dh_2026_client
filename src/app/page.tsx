@@ -1,13 +1,13 @@
-import HomeClient from '@/components/home/HomeClient'
-import { getHome } from '@/lib/api/home'
+import HomeV2Client from '@/components/home/HomeV2Client'
+import { getHomeV2 } from '@/lib/api/home'
 
 export default async function Page() {
   let homeData: any = null
   try {
-    homeData = await getHome()
+    homeData = await getHomeV2()
   } catch {
     // fallback khi Strapi chưa có data
   }
 
-  return <HomeClient data={homeData} />
+  return <HomeV2Client data={homeData} />
 }

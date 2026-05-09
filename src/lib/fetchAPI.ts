@@ -36,7 +36,7 @@ export default async function fetchAPI({
 
     const queryString = qs.stringify(mergedParams)
 
-    const requestUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api${path}${
+    const requestUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/cms/api${path}${
       queryString ? `?${queryString}` : ''
     }`
 

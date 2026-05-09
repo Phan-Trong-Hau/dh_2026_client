@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import TechnicalLoader from '../TechnicalLoader'
 import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
+import BackButton from '../BackButton'
 
 const TRANSITION_MS = 350
 
@@ -237,13 +238,7 @@ export default function PartyConventionClient({ data }: Props) {
         {/* DETAIL VIEW */}
         {view === 'detail' && detailItem && (
           <div className="relative h-full w-full flex flex-col items-center justify-center">
-             <button
-              onClick={() => transitionTo('list')}
-               className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
-              aria-label="Quay lại"
-            >
-              <span className="text-2xl mb-1 transition-transform">←</span>
-            </button>
+             <BackButton onClick={() => transitionTo('list')} />
             <div 
               className="relative max-w-[85vw] max-h-[85vh] cursor-pointer group"
               onClick={() => transitionTo('info')}
@@ -274,13 +269,7 @@ export default function PartyConventionClient({ data }: Props) {
         {/* INFO VIEW */}
         {view === 'info' && detailItem && (
           <div className="relative h-full w-full bg-black">
-            <button
-              onClick={() => transitionTo('detail')}
-              className="fixed top-8 left-8 z-50 w-12 h-12 flex items-center justify-center text-white bg-black/40 rounded-full backdrop-blur-md border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 group"
-              aria-label="Quay lại"
-            >
-              <span className="text-2xl mb-1 transition-transform">←</span>
-            </button>
+            <BackButton onClick={() => transitionTo('detail')} />
             
             <div className="h-full w-full overflow-y-auto custom-scrollbar">
               <div className="w-full flex justify-center">

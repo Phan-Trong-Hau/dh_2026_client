@@ -15,16 +15,25 @@ export const metadata: Metadata = {
   description: "Nhiệm kỳ 2026 - 2031",
 };
 
-export default function RootLayout({
+import { getHomeV2 } from "@/lib/api/home";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let homeData = null;
+  try {
+    homeData = await getHomeV2();
+  } catch (error) {
+    console.error("Failed to fetch layout data:", error);
+  }
+
   return (
     <html lang="vi" className={`${beVietnamPro.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-be-vietnam)] bg-black text-white">
         <ClickEffect />
-        <SideNav />
+        <SideNav initialData={homeData} />
         {children}
       </body>
     </html>
