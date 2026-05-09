@@ -104,8 +104,8 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
   // Preload all images
   const preloadUrls = useMemo(() => {
     const urls = [
-      getStrapiImageUrl(anhNen?.url),
-      getStrapiImageUrl(anhNenChiTiet?.url),
+      getStrapiImageUrl(anhNen?.url || ''),
+      getStrapiImageUrl(anhNenChiTiet?.url || ''),
       ...Object.values(ICONS)
     ]
     groups.forEach(g => {
@@ -136,7 +136,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
       {/* Background Layer */}
       <div className="absolute inset-0 z-0">
         <img
-          src={getStrapiImageUrl(view === 'listing' ? anhNen?.url : anhNenChiTiet?.url)}
+          src={getStrapiImageUrl((view === 'listing' ? anhNen?.url : anhNenChiTiet?.url) || '')}
           alt="Background"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           className="transition-all duration-1000"
@@ -328,7 +328,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           initial={{ opacity: 0, scale: 0.98 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 1.02 }}
-                          src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url)}
+                          src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url || '')}
                           alt="Detail"
                           className="w-full h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                         />

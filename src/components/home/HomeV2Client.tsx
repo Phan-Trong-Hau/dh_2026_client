@@ -38,8 +38,8 @@ export default function HomeV2Client({ data }: Props) {
   const danhSachLink = rawData?.danh_sach_link ?? []
 
   const preloadUrls = [
-    getStrapiImageUrl(anhNen?.url),
-    ...danhSachLink.map((item: any) => getStrapiImageUrl(item.anh?.url)),
+    getStrapiImageUrl(anhNen?.url || ''),
+    ...danhSachLink.map((item: any) => getStrapiImageUrl(item.anh?.url || '')),
     ARROW_ICON
   ].filter(Boolean) as string[]
 

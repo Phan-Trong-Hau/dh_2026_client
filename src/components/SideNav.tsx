@@ -65,7 +65,7 @@ export default function SideNav({ initialData }: Props) {
         {navItems.map((item) => {
           const isActive = pathname === item.href
           const hasChildren = item.children && item.children.length > 0
-          const isChildActive = hasChildren && item.children?.some(child => pathname === child.href)
+          const isChildActive = hasChildren && item.children?.some((child: any) => pathname === child.href)
 
           return (
             <div key={item.href} className="flex flex-col gap-1">
@@ -88,7 +88,7 @@ export default function SideNav({ initialData }: Props) {
               {/* Render children if they exist */}
               {hasChildren && (
                 <div className="flex flex-col gap-1 ml-6 pl-3 border-l border-white/10 mb-1">
-                  {item.children?.map((child) => {
+                  {item.children?.map((child: any) => {
                     const isChildPathActive = pathname === child.href
                     return (
                       <Link
