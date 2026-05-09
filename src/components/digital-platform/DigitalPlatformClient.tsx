@@ -58,6 +58,9 @@ export default function DigitalPlatformClient({ data }: Props) {
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
   const [activeGroupIndex, setActiveGroupIndex] = useState<number>(0)
 
+  const [activeMode, setActiveMode] = useState<'video' | 'document' | 'link' | null>(null)
+  const [isDialExpanded, setIsDialExpanded] = useState(false)
+
   const rawData = data?.data
   const anhNen = rawData?.anh_nen
   const anhNenChiTiet = rawData?.anh_nen_chi_tiet
@@ -73,6 +76,7 @@ export default function DigitalPlatformClient({ data }: Props) {
           setSelectedPlatform(platform)
           setActiveGroupIndex(gIdx)
           setView('detail')
+          setActiveMode(getPlatformType(platform))
           found = true
         }
       })
@@ -93,6 +97,8 @@ export default function DigitalPlatformClient({ data }: Props) {
   const handleBack = () => {
     router.push('/nen-tang-so-tieu-bieu')
   }
+
+  const DEFAULT_URL = "https://www.youtube.com/watch?v=uEQ7fH7ViXo&list=RDuEQ7fH7ViXo&start_radio=1"
 
   // Preload all images
   const preloadUrls = useMemo(() => {
@@ -115,9 +121,11 @@ export default function DigitalPlatformClient({ data }: Props) {
   // Infer type if not provided
   const getPlatformType = (p: Platform) => {
     if (p.loai) return p.loai
-    if (p.link_video) return 'video'
-    if (p.link && (p.link.startsWith('http') || p.link.includes('.'))) return 'link'
-    return 'document'
+    const link = p.link_video || p.link
+    if (link?.includes('youtube.com') || link?.includes('youtu.be')) return 'video'
+    if (p.link) return 'link'
+    // If no links at all, we'll default to video for the fallback URL provided by user
+    return 'document' 
   }
 
   if (!isLoaded) return <TechnicalLoader isVisible={true} />
@@ -132,6 +140,8 @@ export default function DigitalPlatformClient({ data }: Props) {
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           className="transition-all duration-1000"
         />
+        {/* Optional overlay for better contrast if needed */}
+        {view === 'detail' && <div className="absolute inset-0 bg-black/10 pointer-events-none" />}
       </div>
 
       <AnimatePresence mode="wait">
@@ -141,7 +151,7 @@ export default function DigitalPlatformClient({ data }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="relative z-10 w-full h-screen flex flex-col pt-58 pb-10"
+            className="relative z-10 w-full h-screen flex flex-col pt-32 pb-10"
           >
             <div className="w-full px-10 overflow-y-auto custom-scrollbar flex-1">
               <div className="max-w-6xl mx-auto flex flex-col gap-16">
@@ -161,7 +171,6 @@ export default function DigitalPlatformClient({ data }: Props) {
                     {/* Platforms Grid - 3 Columns with Fade Mask */}
                     <div 
                       className="grid grid-cols-1 md:grid-cols-3 gap-8"
-                    
                     >
                       {group.danh_sach_nen_tang.map((platform, pIdx) => (
                         <motion.div
@@ -171,7 +180,7 @@ export default function DigitalPlatformClient({ data }: Props) {
                           transition={{ delay: pIdx * 0.1 }}
                           whileTap={{ scale: 0.95 }}
                           className="cursor-pointer group"
-                          onClick={() => handleSelectPlatform({ ...platform, gIdx })}
+                          onClick={() => handleSelectPlatform(platform)}
                         >
                           {platform.anh_nen?.url && (
                             <div className="relative w-full group h-full overflow-hidden">
@@ -205,124 +214,224 @@ export default function DigitalPlatformClient({ data }: Props) {
         ) : (
           <motion.div
             key="detail"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            className="relative z-10 w-full h-screen flex flex-col pt-24"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="relative z-10 w-full h-screen flex flex-col"
           >
-            <BackButton onClick={handleBack} />
+            {/* Standard Detail Header */}
+            <div className="w-full h-[10vh] flex items-center justify-between px-6 md:px-10">
+              
+              <h1 className="text-sm md:text-lg font-bold text-white uppercase tracking-tight text-center max-w-[70vw] truncate">
+                {selectedPlatform?.ten} <span className="mx-2">-</span> {groups[activeGroupIndex]?.ten_nhom}
+              </h1>
 
-            <div className="flex flex-1 overflow-hidden px-10 pb-10 gap-10">
-              {/* Sidebar Left */}
-              <div className="w-80 flex-shrink-0 flex flex-col bg-black/20 backdrop-blur-md rounded-3xl border border-white/10 overflow-hidden">
-                <div className="p-6 border-b border-white/10">
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="w-10 h-10 relative flex items-center justify-center"
-                    >
-                      <img src={ICONS.MAIN} alt="Main Icon" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                    </motion.div>
-                    <span className="text-yellow-500 font-bold tracking-wider uppercase text-sm">Danh sách</span>
-                  </div>
-                </div>
+           
+            </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
-                  {groups.map((group, gIdx) => (
-                    <div key={group.id} className="mb-4">
-                      <div className="sticky top-0 z-20 bg-[#1a1a1a]/80 backdrop-blur-sm px-4 py-3 text-white font-black uppercase text-sm tracking-widest border-l-4 border-yellow-500 mb-2">
-                        {group.ten_nhom}
-                      </div>
-                      <div className="flex flex-col gap-1 px-2">
-                        {group.danh_sach_nen_tang.map((p) => {
-                          const type = getPlatformType(p)
-                          const isActive = selectedPlatform?.id === p.id
-                          
-                          let icon = ICONS.DOC
-                          if (type === 'video') icon = isActive ? ICONS.VIDEO_ACTIVE : ICONS.VIDEO
-                          else if (type === 'link') icon = ICONS.LINK
-                          else if (type === 'document') icon = isActive ? ICONS.DOC_ACTIVE : ICONS.DOC
-
-                          return (
+            <div className="flex flex-1 overflow-hidden">
+              {/* Left Sidebar - Fixed Accordion (All parents always visible) */}
+              <div className="w-[24vw] flex-shrink-0 flex flex-col p-6 gap-4 overflow-hidden h-full">
+                 <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+                   {groups.map((group, gIdx) => {
+                      const isGroupActive = activeGroupIndex === gIdx
+                      return (
+                        <div 
+                          key={group.id} 
+                          className={`flex flex-col overflow-hidden transition-all duration-500 ${
+                            isGroupActive ? 'flex-1 min-h-0' : 'flex-initial'
+                          }`}
+                        >
+                          {/* Parent Group Button */}
+                          <div className="flex-shrink-0 pb-2">
                             <button
-                              key={p.id}
-                              onClick={() => {
-                                if (type === 'link' && p.link) {
-                                  window.open(p.link, '_blank')
-                                } else {
-                                  setSelectedPlatform(p)
-                                  setActiveGroupIndex(gIdx)
-                                }
-                              }}
-                              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left group ${
-                                isActive ? 'bg-yellow-500/20 text-yellow-500' : 'text-white/60 hover:bg-white/5 hover:text-white'
+                              onClick={() => setActiveGroupIndex(gIdx)}
+                              className={`w-full py-4 px-6 rounded-2xl md:rounded-xl shadow-xl font-black text-center text-xs md:text-sm uppercase tracking-wide transition-all duration-300 ${
+                                isGroupActive 
+                                  ? 'bg-white text-[#8b0000]' 
+                                  : 'bg-white text-[#8b0000]/80'
                               }`}
                             >
-                              <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                                <img src={icon} alt="Type Icon" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                              </div>
-                              <span className="text-xs font-medium leading-tight">{p.ten}</span>
+                              {group.ten_nhom}
                             </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                          </div>
+
+                          {/* Child Platforms - Scrollable inside the remaining space */}
+                          <AnimatePresence initial={false}>
+                            {isGroupActive && (
+                              <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 px-3 py-2"
+                              >
+                                {group.danh_sach_nen_tang.map((p) => {
+                                  const isPlatformSelected = selectedPlatform?.id === p.id
+                                  return (
+                                    <button
+                                      key={p.id}
+                                      onClick={() => handleSelectPlatform(p)}
+                                      className={`w-full py-3 px-6 flex-shrink-0 rounded-xl shadow-lg text-xs md:text-sm font-bold text-left transition-all duration-300 ${
+                                        isPlatformSelected
+                                          ? 'bg-[#8b0000] text-white ring ring-yellow-400 ring-offset-2 ring-offset-transparent'
+                                          : 'bg-[#8b0000]/80 text-white hover:bg-[#8b0000]'
+                                      }`}
+                                    >
+                                      {p.ten}
+                                    </button>
+                                  )
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )
+                   })}
+                 </div>
               </div>
 
               {/* Main Content Area */}
-              <div className="flex-1 flex flex-col gap-6">
-                {/* Header */}
-                <div className="bg-black/20 backdrop-blur-md px-10 py-6 rounded-3xl border border-white/10">
-                  <h1 className="text-2xl font-black text-white uppercase tracking-tight">
-                    <span className="text-yellow-500">{selectedPlatform?.ten}</span>
-                    <span className="mx-4 text-white/30">—</span>
-                    <span className="text-white/80">{groups[activeGroupIndex]?.ten_nhom}</span>
-                  </h1>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 bg-black/40 backdrop-blur-xl rounded-[2.5rem] border border-white/10 overflow-hidden relative shadow-2xl flex items-center justify-center">
-                  {selectedPlatform && (
+              <div className="flex-1 relative flex items-center justify-center p-20">
+                 {selectedPlatform && (
                     <AnimatePresence mode="wait">
-                      {getPlatformType(selectedPlatform) === 'video' && selectedPlatform.link_video ? (
+                      {activeMode === 'video' ? (
                         <motion.div
                           key={`video-${selectedPlatform.id}`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="w-full h-full"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="w-full aspect-video max-w-6xl bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
                         >
                           <iframe
-                            src={selectedPlatform.link_video.replace('watch?v=', 'embed/')}
+                            src={(selectedPlatform.link_video || selectedPlatform.link || DEFAULT_URL).replace('watch?v=', 'embed/').split('&')[0]}
                             className="w-full h-full border-none"
                             allowFullScreen
                           />
                         </motion.div>
-                      ) : selectedPlatform.anh_chi_tiet?.url ? (
-                        <motion.div
+                      ) : (
+                        <motion.img
                           key={`image-${selectedPlatform.id}`}
                           initial={{ opacity: 0, scale: 0.98 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 1.02 }}
-                          className="w-full h-full p-4 overflow-y-auto custom-scrollbar flex justify-center"
-                        >
-                          <img
-                            src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet.url)}
-                            alt="Detail"
-                            className="max-w-full h-auto object-contain shadow-2xl rounded-xl"
-                          />
-                        </motion.div>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/30 italic">
-                          Đang cập nhật nội dung...
-                        </div>
+                          src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url)}
+                          alt="Detail"
+                          className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                        />
                       )}
                     </AnimatePresence>
-                  )}
-                </div>
+                 )}
+
+                 {/* Floating Right Icons Dial - Corner Expansion effect */}
+                 <div className="absolute right-2 bottom-2 z-50">
+                    <motion.div 
+                      className="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center"
+                      animate={{ 
+                        scale: isDialExpanded ? 0.8 : 0.6,
+                        x: isDialExpanded ? 0 : 0,
+                        y: isDialExpanded ? 0 : 0
+                      }}
+                      transition={{ type: 'spring', damping: 20, stiffness: 150 }}
+                    >
+                        {/* Background Pulsing Glow when expanded */}
+                        <AnimatePresence>
+                          {isDialExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.5 }}
+                              animate={{ opacity: 1, scale: 1.5 }}
+                              exit={{ opacity: 0, scale: 0.5 }}
+                              className="absolute inset-0 bg-yellow-500/20 blur-[60px] rounded-full pointer-events-none"
+                            />
+                          )}
+                        </AnimatePresence>
+
+                        <AnimatePresence>
+                          {isDialExpanded && (
+                            <motion.div
+                              className="absolute inset-0 z-10"
+                              initial="hidden"
+                              animate="visible"
+                              exit="hidden"
+                              variants={{
+                                visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+                                hidden: { transition: { staggerChildren: 0.03, staggerDirection: -1 } }
+                              }}
+                            >
+                          
+
+                              {/* Doc Icon - Top Center */}
+                              <motion.button 
+                                variants={{
+                                  hidden: { x: -20, y: -10, opacity: 0, scale: 0, rotate: -45 },
+                                  visible: { x: -110, y: 40, opacity: 1, scale: 1, rotate: 0 }
+                                  
+                                }}
+                                transition={{ type: 'spring', damping: 12, stiffness: 200 }}
+                                onClick={() => setActiveMode('document')}
+                                className="absolute w-12 h-12 md:w-16 md:h-16 hover:scale-105 active:scale-95 transition-transform"
+                                style={{ left: '50%', top: '50%', marginLeft: '-24px', marginTop: '-24px' }}
+                              >
+                                <img 
+                                  src={activeMode === 'document' ? ICONS.DOC_ACTIVE : ICONS.DOC} 
+                                  alt="Document" 
+                                  className="w-full h-full object-contain drop-shadow-xl"
+                                />
+                              </motion.button>
+
+                              {/* Video Icon - Top Left */}
+                              <motion.button 
+                                variants={{
+                                  hidden: { x: 0, y: -20, opacity: 0, scale: 0, rotate: -45 },
+                                  visible: { x: -110, y: -60, opacity: 1, scale: 1, rotate: 0 }
+                                }}
+                                transition={{ type: 'spring', damping: 12, stiffness: 200 }}
+                                onClick={() => setActiveMode('video')}
+                                className="absolute w-12 h-12 md:w-16 md:h-16 hover:scale-105 active:scale-95 transition-transform"
+                                style={{ left: '50%', top: '50%', marginLeft: '-24px', marginTop: '-24px' }}
+                              >
+                                <img 
+                                  src={activeMode === 'video' ? ICONS.VIDEO_ACTIVE : ICONS.VIDEO} 
+                                  alt="Video" 
+                                  className="w-full h-full object-contain drop-shadow-xl"
+                                />
+                              </motion.button>
+
+                              {/* Link Icon - Top Right */}
+                              <motion.button 
+                                variants={{
+                                  hidden: { x: 20, y: -10, opacity: 0, scale: 0, rotate: -45 },
+                                  visible: { x: -20, y: -120, opacity: 1, scale: 1, rotate: 0 }
+                                }}
+                                transition={{ type: 'spring', damping: 12, stiffness: 200 }}
+                                onClick={() => window.open(selectedPlatform?.link || selectedPlatform?.link_video || DEFAULT_URL, '_blank')}
+                                className="absolute w-12 h-12 md:w-16 md:h-16 hover:scale-105 active:scale-95 transition-transform"
+                                style={{ left: '50%', top: '50%', marginLeft: '-24px', marginTop: '-24px' }}
+                              >
+                                <img src={ICONS.LINK} alt="Link" className="w-full h-full object-contain drop-shadow-xl" />
+                              </motion.button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {/* Main Center Icon - Rotates 360 and pulses */}
+                        <motion.button 
+                          onClick={() => setIsDialExpanded(!isDialExpanded)}
+                          className="relative z-50 w-full h-full cursor-pointer focus:outline-none"
+                          animate={{ 
+                            rotate: isDialExpanded ? 360 : 0,
+                            scale: isDialExpanded ? 1.1 : 1
+                          }}
+                          whileHover={{ scale: 1.15 }}
+                          whileTap={{ scale: 0.9 }}
+                          transition={{ 
+                            rotate: { type: 'spring', damping: 20, stiffness: 200 },
+                            scale: isDialExpanded ? { duration: 0.2 } : { duration: 3, repeat: Infinity }
+                          }}
+                        >
+                           <img src={ICONS.MAIN} alt="Main" className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,190,0,0.5)]" />
+                        </motion.button>
+                    </motion.div>
+                 </div>
               </div>
             </div>
           </motion.div>
