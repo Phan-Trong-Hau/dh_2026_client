@@ -126,10 +126,10 @@ export default function DigitalPlatformClient({ data }: Props) {
             <div className="w-full px-10 overflow-y-auto custom-scrollbar flex-1">
               <div className="max-w-6xl mx-auto flex flex-col gap-16">
                 {groups.map((group, gIdx) => (
-                  <div key={group.id} className="flex flex-col gap-8">
-                    {/* Group Header Image */}
+                  <div key={group.id} className="flex flex-col gap-8 relative">
+                    {/* Group Header Image - Sticky */}
                     {group.anh?.url && (
-                      <div className="w-full relative h-18 overflow-hidden">
+                      <div className="w-full sticky top-0 z-30">
                         <img 
                           src={getStrapiImageUrl(group.anh.url)} 
                           alt={group.ten_nhom}
