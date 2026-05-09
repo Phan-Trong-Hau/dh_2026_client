@@ -42,11 +42,18 @@ interface PageData {
   danh_sach_nhom_nen_trang: Group[]
 }
 
+import Link from 'next/link'
+import { useRouter, useParams } from 'next/navigation'
+
 interface Props {
   data: { data: PageData } | null
 }
 
 export default function DigitalPlatformClient({ data }: Props) {
+  const router = useRouter()
+  const params = useParams()
+  const slug = params?.slug as string | undefined
+
   const [view, setView] = useState<'listing' | 'detail'>('listing')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
   const [activeGroupIndex, setActiveGroupIndex] = useState<number>(0)
@@ -55,6 +62,37 @@ export default function DigitalPlatformClient({ data }: Props) {
   const anhNen = rawData?.anh_nen
   const anhNenChiTiet = rawData?.anh_nen_chi_tiet
   const groups = rawData?.danh_sach_nhom_nen_trang ?? []
+
+  // Initialize selected platform based on slug from URL
+  useEffect(() => {
+    if (slug) {
+      let found = false
+      groups.forEach((group, gIdx) => {
+        const platform = group.danh_sach_nen_tang.find(p => p.path === slug)
+        if (platform) {
+          setSelectedPlatform(platform)
+          setActiveGroupIndex(gIdx)
+          setView('detail')
+          found = true
+        }
+      })
+      if (!found) {
+        setView('listing')
+        setSelectedPlatform(null)
+      }
+    } else {
+      setView('listing')
+      setSelectedPlatform(null)
+    }
+  }, [slug, groups])
+
+  const handleSelectPlatform = (platform: Platform) => {
+    router.push(`/nen-tang-so-tieu-bieu/${platform.path}`)
+  }
+
+  const handleBack = () => {
+    router.push('/nen-tang-so-tieu-bieu')
+  }
 
   // Preload all images
   const preloadUrls = useMemo(() => {
@@ -80,24 +118,6 @@ export default function DigitalPlatformClient({ data }: Props) {
     if (p.link_video) return 'video'
     if (p.link && (p.link.startsWith('http') || p.link.includes('.'))) return 'link'
     return 'document'
-  }
-
-  const allPlatforms = useMemo(() => {
-    return groups.flatMap((group, gIdx) => 
-      group.danh_sach_nen_tang.map(p => ({ ...p, gIdx }))
-    )
-  }, [groups])
-
-  const handleSelectPlatform = (platform: any) => {
-    setSelectedPlatform(platform)
-    setActiveGroupIndex(platform.gIdx)
-    setView('detail')
-  }
-
-  const handleBack = () => {
-    if (view === 'detail') {
-      setView('listing')
-    }
   }
 
   if (!isLoaded) return <TechnicalLoader isVisible={true} />
