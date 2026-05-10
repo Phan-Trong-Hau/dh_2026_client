@@ -17,7 +17,7 @@ export default function BackButton({ href, onClick, className = "" }: BackButton
     </div>
   )
 
-  const containerClass = `fixed top-8 left-8 z-50 ${className}`
+  const containerClass = `fixed bottom-8 left-8 z-50 ${className}`
 
   if (href) {
     return (
