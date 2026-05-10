@@ -148,8 +148,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
       return url.replace(/\/view.*$/, '/preview').replace(/\/edit.*$/, '/preview')
     }
     
-    return url
-  }
+    return `${url}?vq=hd1080`  }
 
   if (!isLoaded) return <TechnicalLoader isVisible={true} />
 
@@ -352,7 +351,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           exit={{ opacity: 0, scale: 1.02 }}
                           src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url || '')}
                           alt="Detail"
-                          className="w-[40%] h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                          className="w-[48%] h-auto"
                         />
                         ) : (
                           <p>Chưa có hình ảnh</p>
