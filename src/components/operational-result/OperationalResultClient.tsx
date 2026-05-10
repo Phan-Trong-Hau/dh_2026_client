@@ -432,7 +432,7 @@ export default function OperationalResultClient({ data }: Props) {
                         <img 
                           src={item.danh_sach_anh_chi_tiet[subIdx]?.url ?? ''}  
                           alt={`Slide ${subIdx}`}
-                          className="w-full h-screen object-fill block"
+                          className="w-full h-screen object-cover block"
                           onLoad={() => {
                             if (selected === idx) setIsInternalLoading(false)
                           }}
@@ -481,7 +481,7 @@ export default function OperationalResultClient({ data }: Props) {
                     <img
                       src={item.trang_chi_tiet.url}
                       alt="Trang chi tiết"
-                      className="w-full h-screen object-fill block"
+                      className="w-full h-screen object-cover block"
                       onLoad={() => {
                         if (selected === idx) setIsInternalLoading(false)
                       }}
