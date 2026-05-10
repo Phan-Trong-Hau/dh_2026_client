@@ -297,7 +297,18 @@ export default function PartyConventionClient({ data }: Props) {
                       const y = e.clientY - rect.top
                       if (y > rect.height - (window.innerHeight - 100)) {
                         if (detailItem.link) {
-                          setShowIframe(true)
+                          const url = detailItem.link.toLowerCase();
+                          const isBook = url.includes('drive.google.com') || 
+                                       url.includes('fliphtml5.com') || 
+                                       url.includes('anyflip.com') || 
+                                       url.includes('pubhtml5.com') ||
+                                       url.includes('heyzine.com');
+                          
+                          if (isBook) {
+                            setShowIframe(true);
+                          } else {
+                            window.open(detailItem.link, '_blank');
+                          }
                         }
                       }
                     }}
@@ -308,18 +319,18 @@ export default function PartyConventionClient({ data }: Props) {
 
             {/* IFRAME MODAL */}
             {showIframe && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-in fade-in duration-300">
                 {/* Backdrop with faint blur */}
                 <div 
                   className="absolute inset-0 bg-black/20 backdrop-blur-sm" 
                   onClick={() => setShowIframe(false)}
                 />
                 
-                <div className="relative w-full h-full max-w-7xl bg-[#1a1a1a] rounded-[2rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col animate-in zoom-in-95 duration-500">
+                <div className="relative w-full h-full bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col animate-in zoom-in-95 duration-500">
                   {/* Floating Close Button */}
                   <button 
                     onClick={() => setShowIframe(false)}
-                    className="absolute top-6 right-6 z-[110] w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-red-600 backdrop-blur-md border border-white/20 text-white transition-all shadow-xl hover:scale-110 active:scale-95 group"
+                    className="absolute top-2 right-2 z-[110] w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-red-600 backdrop-blur-md border border-white/20 text-white transition-all shadow-xl hover:scale-110 active:scale-95 group"
                   >
                     <span className="text-3xl mb-0.5 leading-none transition-transform">×</span>
                   </button>
@@ -327,7 +338,10 @@ export default function PartyConventionClient({ data }: Props) {
                   {/* Iframe Container */}
                   <div className="flex-1 w-full bg-white relative">
                     <iframe
-                      src={detailItem.link!}
+                      src={detailItem.link!.includes('drive.google.com') 
+                        ? detailItem.link!.replace(/\/view.*$/, '/preview').replace(/\/edit.*$/, '/preview')
+                        : detailItem.link!
+                      }
                       className="absolute inset-0 w-full h-full border-none"
                       title="Chi tiết"
                       allowFullScreen
