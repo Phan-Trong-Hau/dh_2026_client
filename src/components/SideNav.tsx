@@ -33,7 +33,7 @@ export default function SideNav({ initialData }: Props) {
         children = [
           { name: 'Kết quả hoạt động', href: '/ket-qua-hoat-dong' },
           { name: 'Các kỳ đại hội', href: '/cac-ky-dai-hoi' },
-          { name: 'Ban Lãnh đạo', href: '/ban-lanh-dao' },
+          { name: 'Chủ tịch UB TW MTTQ VN các thời kỳ', href: '/ban-lanh-dao' },
         ]
       } else if (index === 1) {
         name = 'Triển lãm thực tế ảo'
