@@ -277,7 +277,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           <div className="flex-shrink-0 pb-2">
                             <button
                               onClick={() => setActiveGroupIndex(gIdx)}
-                              className={`w-full py-4 px-6 rounded-2xl md:rounded-xl shadow-xl font-black text-center text-xs md:text-sm uppercase tracking-wide transition-all duration-300 ${
+                              className={`w-full py-4 rounded-2xl md:rounded-xl shadow-xl font-black text-center text-xs md:text-sm uppercase tracking-wide transition-all duration-300 ${
                                 isGroupActive 
                                   ? 'bg-white text-[#8b0000]' 
                                   : 'bg-white text-[#8b0000]/80'
@@ -351,7 +351,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           exit={{ opacity: 0, scale: 1.02 }}
                           src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url || '')}
                           alt="Detail"
-                          className="w-[48%] h-auto"
+                          className="w-[48%] h-auto pb-10"
                         />
                         ) : (
                           <p>Chưa có hình ảnh</p>
