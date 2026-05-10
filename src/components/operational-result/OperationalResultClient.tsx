@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import TechnicalLoader from '../TechnicalLoader'
 import { useImagePreloader } from '@/lib/hooks/useImagePreloader'
 import BackButton from '../BackButton'
@@ -23,6 +24,7 @@ interface HoatDongItem {
   anh_hoat_dong: StrapiImage
   anh_chi_tiet: StrapiImage
   trang_chi_tiet?: StrapiImage
+  danh_sach_anh_chi_tiet?: StrapiImage[]
   mo_ta?: string | null
 }
 
@@ -104,17 +106,26 @@ export default function OperationalResultClient({ data }: Props) {
   const [detailOpacity, setDetailOpacity] = useState(0)
   const [isMegaOpen, setIsMegaOpen] = useState(false)
   const [isInternalLoading, setIsInternalLoading] = useState(false)
+  const [subIdx, setSubIdx] = useState(0)
 
   const items = data?.data?.danh_sach_hoat_dong ?? []
   const anhNen = data?.data?.anh_nen
 
   const preloadUrls = useMemo(() => {
-    return [
+    const urls = [
       anhNen?.url,
       ...items.map(i => i.anh_hoat_dong?.url),
       ...items.map(i => i.anh_chi_tiet?.url),
       ...items.map(i => i.trang_chi_tiet?.url),
-    ].filter(Boolean) as string[]
+    ]
+    items.forEach(i => {
+      if (i.danh_sach_anh_chi_tiet) {
+        i.danh_sach_anh_chi_tiet.forEach(img => {
+          if (img?.url) urls.push(img.url)
+        })
+      }
+    })
+    return urls.filter(Boolean) as string[]
   }, [anhNen?.url, items])
 
   const { isLoaded: isAssetsLoaded } = useImagePreloader(preloadUrls)
@@ -177,6 +188,7 @@ export default function OperationalResultClient({ data }: Props) {
   }, [])
 
   const openMega = useCallback(() => {
+    setSubIdx(0)
     setIsInternalLoading(true)
     setIsMegaOpen(true)
     
@@ -357,7 +369,7 @@ export default function OperationalResultClient({ data }: Props) {
               transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
             }}
             onClick={(e) => {
-              if (detailItem.trang_chi_tiet) {
+              if (detailItem.trang_chi_tiet || (detailItem.danh_sach_anh_chi_tiet && detailItem.danh_sach_anh_chi_tiet.length > 0)) {
                 e.stopPropagation()
                 openMega()
               }
@@ -376,7 +388,7 @@ export default function OperationalResultClient({ data }: Props) {
 
       {/* ── MEGA VIEW — Always in DOM for pre-loading trick ── */}
       <div 
-        className="fixed inset-0 z-[70] bg-black overflow-y-auto custom-scrollbar transition-all duration-500 ease-out"
+        className="fixed inset-0 z-[70] bg-black overflow-hidden custom-scrollbar transition-all duration-500 ease-out"
         style={{
           opacity: isMegaOpen ? 1 : 0,
           visibility: isMegaOpen ? 'visible' : 'hidden',
@@ -392,7 +404,7 @@ export default function OperationalResultClient({ data }: Props) {
               className="w-full"
               style={{ display: selected === idx ? 'block' : 'none' }}
             >
-              {item.trang_chi_tiet?.url && (
+              {/* {item.trang_chi_tiet?.url && (
                 <img
                   src={item.trang_chi_tiet.url}
                   alt="Trang chi tiết"
@@ -403,7 +415,80 @@ export default function OperationalResultClient({ data }: Props) {
                   loading="eager"
                   decoding="sync"
                 />
-              )}
+              )} */}
+
+              <div className="w-full relative min-h-screen">
+                {item.danh_sach_anh_chi_tiet && item.danh_sach_anh_chi_tiet.length > 0 ? (
+                  <div className="relative w-full">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={subIdx}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.4 }}
+                        className="w-full"
+                      >
+                        <img 
+                          src={item.danh_sach_anh_chi_tiet[subIdx]?.url ?? ''}  
+                          alt={`Slide ${subIdx}`}
+                          className="w-full h-screen object-fill block"
+                          onLoad={() => {
+                            if (selected === idx) setIsInternalLoading(false)
+                          }}
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {item.danh_sach_anh_chi_tiet.length > 1 && (
+                      <>
+                        <div className="fixed top-1/2 left-0 -translate-y-1/2 z-[80]">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSubIdx(prev => (prev - 1 + item.danh_sach_anh_chi_tiet!.length) % item.danh_sach_anh_chi_tiet!.length)
+                            }} 
+                            className="p-4 hover:scale-110 transition-transform"
+                          >
+                            <TriangleLeft />
+                          </button>
+                        </div>
+                        <div className="fixed top-1/2 right-0 -translate-y-1/2 z-[80]">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSubIdx(prev => (prev + 1) % item.danh_sach_anh_chi_tiet!.length)
+                            }} 
+                            className="p-4 hover:scale-110 transition-transform"
+                          >
+                            <TriangleRight />
+                          </button>
+                        </div>
+                        
+                        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[80] flex gap-3">
+                          {item.danh_sach_anh_chi_tiet.map((_, sidx) => (
+                            <div 
+                              key={sidx}
+                              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${subIdx === sidx ? 'bg-yellow-400 w-8' : 'bg-white/30'}`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  item.trang_chi_tiet?.url && (
+                    <img
+                      src={item.trang_chi_tiet.url}
+                      alt="Trang chi tiết"
+                      className="w-full h-screen object-fill block"
+                      onLoad={() => {
+                        if (selected === idx) setIsInternalLoading(false)
+                      }}
+                    />
+                  )
+                )}
+              </div>
             </div>
           ))}
         </div>
