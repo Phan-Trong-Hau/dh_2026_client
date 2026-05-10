@@ -26,7 +26,6 @@ interface Platform {
   anh_chi_tiet?: { url: string }
   anh_nen?: { url: string }
   path: string
-  loai?: 'document' | 'video' | 'link' // We'll infer this if missing
 }
 
 interface Group {
@@ -59,7 +58,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
   const [activeGroupIndex, setActiveGroupIndex] = useState<number>(0)
 
-  const [activeMode, setActiveMode] = useState<'video' | 'document' | 'link' | null>(null)
+  const [activeMode, setActiveMode] = useState<'video' | 'document' | 'link' | null>('document')
   const [isDialExpanded, setIsDialExpanded] = useState(true)
 
   const rawData = data?.data
@@ -77,7 +76,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
           setSelectedPlatform(platform)
           setActiveGroupIndex(gIdx)
           setView('detail')
-          setActiveMode(getPlatformType(platform))
+          setActiveMode('document')
           found = true
         }
       })
@@ -121,7 +120,6 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
 
   // Infer type if not provided
   const getPlatformType = (p: Platform) => {
-    if (p.loai) return p.loai
     const link = p.link_video || p.link
     if (
       link?.includes('youtube.com') || 
@@ -130,7 +128,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
     ) return 'video'
     if (p.link) return 'link'
     // If no links at all, we'll default to 'video' since our DEFAULT_URL is now a Drive link
-    return 'video' 
+    return 'document' 
   }
 
   const getEmbedUrl = (url: string) => {
@@ -354,7 +352,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           exit={{ opacity: 0, scale: 1.02 }}
                           src={getStrapiImageUrl(selectedPlatform.anh_chi_tiet?.url || '')}
                           alt="Detail"
-                          className="w-full h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                          className="w-[40%] h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                         />
                         ) : (
                           <p>Chưa có hình ảnh</p>
