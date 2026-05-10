@@ -99,7 +99,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
     router.push('/nen-tang-so-tieu-bieu')
   }
 
-  const DEFAULT_URL = "https://www.youtube.com/watch?v=VU7RUVLIxtg"
+  const DEFAULT_URL = "https://drive.google.com/file/d/16TEw1ltDgyKt9Uc8ziAskOTSD6qGJl1x/view"
 
   // Preload all images
   const preloadUrls = useMemo(() => {
@@ -123,10 +123,34 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
   const getPlatformType = (p: Platform) => {
     if (p.loai) return p.loai
     const link = p.link_video || p.link
-    if (link?.includes('youtube.com') || link?.includes('youtu.be')) return 'video'
+    if (
+      link?.includes('youtube.com') || 
+      link?.includes('youtu.be') || 
+      link?.includes('drive.google.com')
+    ) return 'video'
     if (p.link) return 'link'
-    // If no links at all, we'll default to video for the fallback URL provided by user
-    return 'document' 
+    // If no links at all, we'll default to 'video' since our DEFAULT_URL is now a Drive link
+    return 'video' 
+  }
+
+  const getEmbedUrl = (url: string) => {
+    if (!url) return ''
+    
+    // YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+      const match = url.match(regExp)
+      if (match && match[2].length === 11) {
+        return `https://www.youtube.com/embed/${match[2]}`
+      }
+    }
+    
+    // Google Drive
+    if (url.includes('drive.google.com')) {
+      return url.replace(/\/view.*$/, '/preview').replace(/\/edit.*$/, '/preview')
+    }
+    
+    return url
   }
 
   if (!isLoaded) return <TechnicalLoader isVisible={true} />
@@ -315,7 +339,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           className="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
                         >
                           <iframe
-                            src={(selectedPlatform.link_video || selectedPlatform.link || DEFAULT_URL).replace('watch?v=', 'embed/').split('&')[0]}
+                            src={getEmbedUrl(selectedPlatform.link_video || selectedPlatform.link || DEFAULT_URL)}
                             className="w-full h-full border-none"
                             allowFullScreen
                           />
