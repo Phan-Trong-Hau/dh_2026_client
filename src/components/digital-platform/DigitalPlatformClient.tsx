@@ -325,7 +325,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
               {/* Main Content Area */}
               <div className="flex-1 relative overflow-hidden">
                 {/* Scrollable Content Container */}
-                <div className="absolute inset-0 overflow-y-auto custom-scrollbar px-[12vw] py-[10vh] flex justify-center items-start">
+                <div className="absolute inset-0 overflow-y-auto custom-scrollbar px-[12vw] flex justify-center items-start">
                  {selectedPlatform && (
                     <AnimatePresence mode="wait">
                       {activeMode === 'video' ? (
@@ -334,7 +334,7 @@ export default function DigitalPlatformClient({ data, initialSlug }: Props) {
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.95 }}
-                          className="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+                          className="h-[90vh] aspect-[9/16] mx-auto"
                         >
                           <iframe
                             src={getEmbedUrl(selectedPlatform.link_video || selectedPlatform.link || DEFAULT_URL)}
